@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="..\Cube.h" />
     <ClInclude Include="..\main.h" />
+    <ClInclude Include="..\Mesh.h" />
     <ClInclude Include="..\OBJObject.h" />
     <ClInclude Include="..\shader.h" />
     <ClInclude Include="..\Window.h" />
@@ -28,6 +29,7 @@
   <ItemGroup>
     <ClCompile Include="..\Cube.cpp" />
     <ClCompile Include="..\main.cpp" />
+    <ClCompile Include="..\Mesh.cpp" />
     <ClCompile Include="..\OBJObject.cpp" />
     <ClCompile Include="..\shader.cpp" />
     <ClCompile Include="..\Window.cpp" />
