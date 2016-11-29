@@ -1,8 +1,11 @@
 #include "window.h"
+#include "Model.h"
+#include <glm/gtc/type_ptr.hpp>
 
-const char* window_title = "GLFW Starter Project";
+const char* window_title = "CSE 167 STAR TOURS";
 Cube * cube;
 GLint shaderProgram;
+GLint testShader;
 
 /*
 OBJObject * current;
@@ -11,10 +14,16 @@ OBJObject * dragon;
 OBJObject * bear;
 */
 
+Model * testModel;
+
 
 // On some systems you need to change this to the absolute path
 #define VERTEX_SHADER_PATH "../shader.vert"
 #define FRAGMENT_SHADER_PATH "../shader.frag"
+#define TEST_VERTEX_SHADER "../test.vert"
+#define TEST_FRAGMENT_SHADER "../test.frag"
+
+
 
 // Default camera parameters
 glm::vec3 cam_pos(0.0f, 0.0f, 20.0f);		// e  | Position of camera
@@ -40,6 +49,9 @@ void Window::initialize_objects()
 {
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
+	testShader = LoadShaders(TEST_VERTEX_SHADER, TEST_FRAGMENT_SHADER);
+
+	testModel = new Model("../Assets/Models/nanosuit/nanosuit.obj");
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
@@ -121,8 +133,23 @@ void Window::display_callback(GLFWwindow* window)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Use the shader of programID
-	glUseProgram(shaderProgram);
-	
+	//glUseProgram(shaderProgram);
+	glUseProgram(testShader);
+	glm::mat4 projection = Window::P;
+	glm::mat4 view = Window::V;
+	glUniformMatrix4fv(glGetUniformLocation(testShader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+	glUniformMatrix4fv(glGetUniformLocation(testShader, "view"), 1, GL_FALSE, glm::value_ptr(view));
+
+	// Draw the loaded model
+	glm::mat4 model;
+	model = glm::translate(model, glm::vec3(0.0f, -4.75f, 0.0f)); // Translate it down a bit so it's at the center of the scene
+	model = glm::scale(model, glm::vec3(0.8f, 0.8f, 0.8f));	// It's a bit too big for our scene, so scale it down
+	glUniformMatrix4fv(glGetUniformLocation(testShader, "model"), 1, GL_FALSE, glm::value_ptr(model));
+
+	testModel->Draw(testShader);
+
+
+
 	// Render stuff draw
 
 	// Gets events, including input such as keyboard and mouse or window resizing

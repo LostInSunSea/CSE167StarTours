@@ -13,6 +13,11 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 struct Vertex
 {
 	glm::vec3 Position;
@@ -24,10 +29,8 @@ struct Texture
 {
 	GLuint id;
 	std::string type;
+	aiString path;  // We store the path of the texture to compare with other textures
 };
-
-
-
 
 class Mesh
 {

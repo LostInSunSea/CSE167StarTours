@@ -53,13 +53,13 @@ void Mesh::Draw(GLint shader)
 {
 	GLuint diffuseNr = 1;
 	GLuint specularNr = 1;
-	for (GLuint i = 0; i < this->textures.size(); i++)
+	for (GLuint i = 0; i < textures.size(); i++)
 	{
 		glActiveTexture(GL_TEXTURE0 + i); // Activate proper texture unit before binding
 										  // Retrieve texture number (the N in diffuse_textureN)
 		std::stringstream ss;
 		std::string number;
-		std::string name = this->textures[i].type;
+		std::string name = textures[i].type;
 		if (name == "texture_diffuse")
 			ss << diffuseNr++; // Transfer GLuint to stream
 		else if (name == "texture_specular")
@@ -67,12 +67,12 @@ void Mesh::Draw(GLint shader)
 		number = ss.str();
 
 		glUniform1f(glGetUniformLocation(shader, ("material." + name + number).c_str()), i);
-		glBindTexture(GL_TEXTURE_2D, this->textures[i].id);
+		glBindTexture(GL_TEXTURE_2D, textures[i].id);
 	}
 	glActiveTexture(GL_TEXTURE0);
 
 	// Draw mesh
-	glBindVertexArray(this->VAO);
-	glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(VAO);
+	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 }
