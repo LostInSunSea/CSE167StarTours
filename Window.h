@@ -14,6 +14,7 @@
 #include "shader.h"
 #include "OBJObject.h"
 #include "DirLight.h"
+#include "AudioEngine.h"
 
 struct dirLight_s
 {

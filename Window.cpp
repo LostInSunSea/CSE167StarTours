@@ -16,6 +16,7 @@ OBJObject * bear;
 */
 
 Model * testModel;
+AudioEngine * audioEngine=new AudioEngine();
 
 
 // On some systems you need to change this to the absolute path
@@ -38,6 +39,7 @@ int Window::height;
 
 glm::mat4 Window::P;
 glm::mat4 Window::V;
+
 dirLight_s Window::dirLight;
 pointLight_s Window::pointLight;
 spotlight_s Window::spotLight;
@@ -55,6 +57,8 @@ DirLight * sun;
 
 void Window::initialize_objects()
 {
+
+	audioEngine->init(cam_pos);
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
 	testShader = LoadShaders(TEST_VERTEX_SHADER, TEST_FRAGMENT_SHADER);
@@ -90,13 +94,11 @@ void Window::initialize_objects()
 	{
 		exit(1);
 	}
-
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void Window::clean_up()
 {
-	delete(cube);
 	glDeleteProgram(shaderProgram);
 }
 
@@ -170,7 +172,7 @@ void Window::display_callback(GLFWwindow* window)
 {
 	//testing
 	glm::mat4 model;
-
+	
 	//Draw depth buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, DepthFrameBuffer);
 	glViewport(0, 0, 1024, 1024);
@@ -205,8 +207,8 @@ void Window::display_callback(GLFWwindow* window)
 
 
 	testModel->Draw(depthShader);
-
-
+	
+	
 	glm::mat4 biasMatrix(
 		0.5, 0.0, 0.0, 0.0,
 		0.0, 0.5, 0.0, 0.0,
@@ -214,7 +216,7 @@ void Window::display_callback(GLFWwindow* window)
 		0.5, 0.5, 0.5, 1.0
 	);
 	glm::mat4 depthBiasMVP = biasMatrix*depthMVP;
-
+	
 
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -237,7 +239,7 @@ void Window::display_callback(GLFWwindow* window)
 
 	// Draw the loaded model
 	model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(0.0f, -0.0f, 0.0f)); // Translate it down a bit so it's at the center of the scene
+	model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Translate it down a bit so it's at the center of the scene
 	model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));	// It's a bit too big for our scene, so scale it down
 	glUniformMatrix4fv(glGetUniformLocation(testShader, "model"), 1, GL_FALSE, glm::value_ptr(model));
 
@@ -261,6 +263,9 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		{
 			// Close the window. This causes the program to also terminate.
 			glfwSetWindowShouldClose(window, GL_TRUE);
+		}
+		if (key == GLFW_KEY_K) {
+			audioEngine->setChannelVolume(0, 2.0f);
 		}
 	}
 }
