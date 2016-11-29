@@ -15,6 +15,7 @@ OBJObject * bear;
 */
 
 Model * testModel;
+AudioEngine * audioEngine=new AudioEngine();
 
 
 // On some systems you need to change this to the absolute path
@@ -51,7 +52,8 @@ void Window::initialize_objects()
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
 	testShader = LoadShaders(TEST_VERTEX_SHADER, TEST_FRAGMENT_SHADER);
 
-	testModel = new Model("../Assets/Models/nanosuit/nanosuit.obj");
+	//testModel = new Model("../Assets/Models/nanosuit/nanosuit.obj");
+	audioEngine->init(cam_pos);
 }
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
@@ -146,7 +148,7 @@ void Window::display_callback(GLFWwindow* window)
 	model = glm::scale(model, glm::vec3(0.8f, 0.8f, 0.8f));	// It's a bit too big for our scene, so scale it down
 	glUniformMatrix4fv(glGetUniformLocation(testShader, "model"), 1, GL_FALSE, glm::value_ptr(model));
 
-	testModel->Draw(testShader);
+	//testModel->Draw(testShader);
 
 
 
@@ -168,6 +170,9 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		{
 			// Close the window. This causes the program to also terminate.
 			glfwSetWindowShouldClose(window, GL_TRUE);
+		}
+		if (key == GLFW_KEY_K) {
+			audioEngine->setChannelVolume(0, 2.0f);
 		}
 	}
 }
