@@ -13,6 +13,7 @@
 #include "Cube.h"
 #include "shader.h"
 #include "OBJObject.h"
+#include "DirLight.h"
 
 struct dirLight_s
 {

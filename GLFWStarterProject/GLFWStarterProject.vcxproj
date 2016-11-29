@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Cube.h" />
+    <ClInclude Include="..\DirLight.h" />
     <ClInclude Include="..\main.h" />
     <ClInclude Include="..\Mesh.h" />
     <ClInclude Include="..\Model.h" />
@@ -29,6 +30,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Cube.cpp" />
+    <ClCompile Include="..\DirLight.cpp" />
     <ClCompile Include="..\main.cpp" />
     <ClCompile Include="..\Mesh.cpp" />
     <ClCompile Include="..\Model.cpp" />
