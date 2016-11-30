@@ -7,6 +7,7 @@ Cube * cube;
 GLint shaderProgram;
 GLint testShader;
 GLint depthShader;
+GLint shadowShader;
 
 /*
 OBJObject * current;
@@ -26,6 +27,8 @@ AudioEngine * audioEngine=new AudioEngine();
 #define TEST_FRAGMENT_SHADER "../test.frag"
 #define DEPTH_VERTEX_SHADER "../depth.vert"
 #define DEPTH_FRAGMENT_SHADER "../depth.frag"
+#define SHADOW_VERTEX_SHADER "../shadow.vert"
+#define SHADOW_FRAGMENT_SHADER "../shadow.frag"
 
 
 
@@ -63,7 +66,7 @@ void Window::initialize_objects()
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
 	testShader = LoadShaders(TEST_VERTEX_SHADER, TEST_FRAGMENT_SHADER);
 	depthShader = LoadShaders(DEPTH_VERTEX_SHADER, DEPTH_FRAGMENT_SHADER);
-
+	shadowShader = LoadShaders(SHADOW_VERTEX_SHADER, SHADOW_FRAGMENT_SHADER);
 
 	//testModel = new Model("../Assets/Models/nanosuit/nanosuit.obj");
 	//testModel = new Model("../Assets/Models/snowspeeder/Star Wars Snowspeeder.obj");
@@ -172,7 +175,9 @@ void Window::display_callback(GLFWwindow* window)
 {
 	//testing
 	glm::mat4 model;
-	
+	model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Translate it down a bit so it's at the center of the scene
+	model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));	// It's a bit too big for our scene, so scale it down
 	//Draw depth buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, DepthFrameBuffer);
 	glViewport(0, 0, 1024, 1024);
@@ -192,10 +197,7 @@ void Window::display_callback(GLFWwindow* window)
 	glm::mat4 depthProjectionMatrix = glm::ortho<float>(-10, 10, -10, 10, -10, 20);
 	glm::mat4 depthViewMatrix = glm::lookAt(lightInvDir, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
-	//set model
-	
-	model = glm::translate(model, glm::vec3(0.0f, -0.0f, 0.0f)); // Translate it down a bit so it's at the center of the scene
-	model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));	// It's a bit too big for our scene, so scale it down
+
 	//BASED OFF EACH OBJECT
 	glm::mat4 depthModelMatrix = model;
 	glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
@@ -204,11 +206,10 @@ void Window::display_callback(GLFWwindow* window)
 	// in the "MVP" uniform
 	glUniformMatrix4fv(glGetUniformLocation(depthShader, "depthMVP"), 1, GL_FALSE, &depthMVP[0][0]);
 
-
-
 	testModel->Draw(depthShader);
 	
 	
+
 	glm::mat4 biasMatrix(
 		0.5, 0.0, 0.0, 0.0,
 		0.0, 0.5, 0.0, 0.0,
@@ -216,9 +217,10 @@ void Window::display_callback(GLFWwindow* window)
 		0.5, 0.5, 0.5, 1.0
 	);
 	glm::mat4 depthBiasMVP = biasMatrix*depthMVP;
+
 	
 
-
+	
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	Window::resize_callback(window, width, height); // Render on the whole framebuffer, complete from the lower left corner to the upper right
 
@@ -229,6 +231,35 @@ void Window::display_callback(GLFWwindow* window)
 	// Clear the color and depth buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
+	glUseProgram(shadowShader);
+	glm::mat4 projection = Window::P;
+	glm::mat4 view = Window::V;
+	glUniformMatrix4fv(glGetUniformLocation(shadowShader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+	glUniformMatrix4fv(glGetUniformLocation(shadowShader, "view"), 1, GL_FALSE, glm::value_ptr(view));
+	glUniformMatrix4fv(glGetUniformLocation(shadowShader, "model"), 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(glGetUniformLocation(shadowShader, "DepthBiasMVP"), 1, GL_FALSE, &depthBiasMVP[0][0]);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, depthTexture);
+	glUniform1i(glGetUniformLocation(shadowShader, "shadowMap"), 1);
+
+	testModel->Draw(shadowShader);
+
+
+	
+
+
+	/*
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	Window::resize_callback(window, width, height); // Render on the whole framebuffer, complete from the lower left corner to the upper right
+
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK); // Cull back-facing triangles -> draw only front-facing triangles
+
+
+	// Clear the color and depth buffers
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	// Use the shader of programID
 	//glUseProgram(shaderProgram);
 	glUseProgram(testShader);
@@ -244,7 +275,7 @@ void Window::display_callback(GLFWwindow* window)
 	glUniformMatrix4fv(glGetUniformLocation(testShader, "model"), 1, GL_FALSE, glm::value_ptr(model));
 
 	testModel->Draw(testShader);
-
+	*/
 
 
 	// Gets events, including input such as keyboard and mouse or window resizing
