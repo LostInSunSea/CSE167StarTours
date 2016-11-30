@@ -122,5 +122,11 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="packages.config" />
+    <None Include="..\skyShader.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\skyShader.vert">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

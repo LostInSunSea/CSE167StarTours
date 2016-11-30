@@ -57,6 +57,8 @@
   <ItemGroup>
     <None Include="..\shader.frag" />
     <None Include="..\shader.vert" />
+    <None Include="..\skyShader.frag" />
+    <None Include="..\skyShader.vert" />
     <None Include="packages.config" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

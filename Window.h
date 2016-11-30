@@ -15,6 +15,7 @@
 #include "OBJObject.h"
 #include "DirLight.h"
 #include "AudioEngine.h"
+#include "SkyBox.h"
 
 struct dirLight_s
 {

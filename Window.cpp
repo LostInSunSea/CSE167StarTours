@@ -8,16 +8,11 @@ GLint shaderProgram;
 GLint testShader;
 GLint depthShader;
 GLint shadowShader;
-
-/*
-OBJObject * current;
-OBJObject * bunny;
-OBJObject * dragon;
-OBJObject * bear;
-*/
+GLint skyboxShader;
 
 Model * testModel;
 AudioEngine * audioEngine=new AudioEngine();
+SkyBox * skyboxObj = new SkyBox();
 
 
 // On some systems you need to change this to the absolute path
@@ -29,7 +24,8 @@ AudioEngine * audioEngine=new AudioEngine();
 #define DEPTH_FRAGMENT_SHADER "../depth.frag"
 #define SHADOW_VERTEX_SHADER "../shadow.vert"
 #define SHADOW_FRAGMENT_SHADER "../shadow.frag"
-
+#define SKYBOX_VERTEX_SHADER_PATH "../skyShader.vert"
+#define SKYBOX_FRAGMENT_SHADER_PATH "../skyShader.frag"
 
 
 // Default camera parameters
@@ -67,11 +63,14 @@ void Window::initialize_objects()
 	testShader = LoadShaders(TEST_VERTEX_SHADER, TEST_FRAGMENT_SHADER);
 	depthShader = LoadShaders(DEPTH_VERTEX_SHADER, DEPTH_FRAGMENT_SHADER);
 	shadowShader = LoadShaders(SHADOW_VERTEX_SHADER, SHADOW_FRAGMENT_SHADER);
+	skyboxShader = LoadShaders(SKYBOX_VERTEX_SHADER_PATH, SKYBOX_FRAGMENT_SHADER_PATH);
+
+	skyboxObj->init();
 
 	//testModel = new Model("../Assets/Models/nanosuit/nanosuit.obj");
 	//testModel = new Model("../Assets/Models/snowspeeder/Star Wars Snowspeeder.obj");
 	//testModel = new Model("../Assets/Models/grass/grassCube.obj");
-	testModel = new Model("../Assets/Models/scene/scene.obj");
+	//testModel = new Model("../Assets/Models/scene/scene.obj");
 
 
 	sun = new DirLight(glm::vec3(-3, -9, 0), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.9f, 0.9f, 0.9f), glm::vec3(0.3f, 0.3f, 0.3f));
@@ -173,6 +172,7 @@ void Window::idle_callback()
 
 void Window::display_callback(GLFWwindow* window)
 {
+
 	//testing
 	glm::mat4 model;
 	model = glm::mat4(1.0f);
@@ -206,7 +206,7 @@ void Window::display_callback(GLFWwindow* window)
 	// in the "MVP" uniform
 	glUniformMatrix4fv(glGetUniformLocation(depthShader, "depthMVP"), 1, GL_FALSE, &depthMVP[0][0]);
 
-	testModel->Draw(depthShader);
+	//testModel->Draw(depthShader);
 	
 	
 
@@ -217,9 +217,6 @@ void Window::display_callback(GLFWwindow* window)
 		0.5, 0.5, 0.5, 1.0
 	);
 	glm::mat4 depthBiasMVP = biasMatrix*depthMVP;
-
-	
-
 	
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	Window::resize_callback(window, width, height); // Render on the whole framebuffer, complete from the lower left corner to the upper right
@@ -244,7 +241,8 @@ void Window::display_callback(GLFWwindow* window)
 	glUniform1i(glGetUniformLocation(shadowShader, "shadowMap"), 8);
 	glBindTexture(GL_TEXTURE_2D, depthTexture);
 
-	testModel->Draw(shadowShader);
+	//draw the skybox
+	skyboxObj->drawSkyBox();
 
 
 	
