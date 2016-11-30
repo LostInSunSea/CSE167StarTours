@@ -1,4 +1,5 @@
 #pragma once
+#include "Node.h"
 #define GLFW_INCLUDE_GLEXT
 #ifdef __APPLE__
 #define GLFW_INCLUDE_GLCOREARB
@@ -10,7 +11,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 
-class DirLight
+class DirLight:
+	public Node
 {
 public:
 	glm::vec3 dir;

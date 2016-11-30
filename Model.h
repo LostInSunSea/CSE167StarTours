@@ -1,4 +1,5 @@
 #pragma once
+#include "Component.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -21,7 +22,8 @@
 
 #include "Mesh.h"
 
-class Model
+class Model:
+	Component
 {
 private:
 	std::vector<Mesh> meshes;
