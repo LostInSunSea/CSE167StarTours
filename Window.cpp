@@ -74,7 +74,7 @@ void Window::initialize_objects()
 	testModel = new Model("../Assets/Models/scene/scene.obj");
 
 
-	sun = new DirLight(glm::vec3(-1, -3, 0), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.9f, 0.9f, 0.9f), glm::vec3(0.3f, 0.3f, 0.3f));
+	sun = new DirLight(glm::vec3(-3, -9, 0), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.9f, 0.9f, 0.9f), glm::vec3(0.3f, 0.3f, 0.3f));
 
 	//set up depth texture
 	glGenFramebuffers(1, &DepthFrameBuffer);
@@ -240,9 +240,9 @@ void Window::display_callback(GLFWwindow* window)
 	glUniformMatrix4fv(glGetUniformLocation(shadowShader, "model"), 1, GL_FALSE, glm::value_ptr(model));
 	glUniformMatrix4fv(glGetUniformLocation(shadowShader, "DepthBiasMVP"), 1, GL_FALSE, &depthBiasMVP[0][0]);
 
-	glActiveTexture(GL_TEXTURE1);
+	glActiveTexture(GL_TEXTURE8);
+	glUniform1i(glGetUniformLocation(shadowShader, "shadowMap"), 8);
 	glBindTexture(GL_TEXTURE_2D, depthTexture);
-	glUniform1i(glGetUniformLocation(shadowShader, "shadowMap"), 1);
 
 	testModel->Draw(shadowShader);
 

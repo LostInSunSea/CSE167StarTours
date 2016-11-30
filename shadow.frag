@@ -6,15 +6,19 @@ in vec4 ShadowCoords;
 out vec4 color;
 
 uniform sampler2D texture_diffuse1;
-uniform sampler2DShadow shadowMap;
+uniform sampler2D shadowMap;
 
 void main()
 {    
 	
 	float visibility = 1.0;
-	if(texture(shadowMap, ShadowCoords.xy).z < ShadowCoords.z)
+
+	vec3 DiffuseColor = texture( texture_diffuse1, TexCoords ).rgb;
+
+	if(texture(shadowMap, ShadowCoords.xy).z < ShadowCoords.z - 0.01)
 	{
 		visibility = 0.5;
 	}
 
-    color = vec4(texture(texture_diffuse1, TexCoords));
+    color = visibility * vec4(DiffuseColor, 1);
+}
