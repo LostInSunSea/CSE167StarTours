@@ -6,5 +6,7 @@ class Component :
 public:
 	Component();
 	~Component();
+	void draw(glm::mat4 trans, GLint shader);
+	void update();
 };
 
