@@ -14,6 +14,9 @@ Model * testModel;
 AudioEngine * audioEngine=new AudioEngine();
 SkyBox * skyboxObj = new SkyBox();
 
+double Window::prevx;
+double Window::prevy;
+
 
 // On some systems you need to change this to the absolute path
 #define VERTEX_SHADER_PATH "../shader.vert"
@@ -71,6 +74,7 @@ void Window::initialize_objects()
 	//testModel = new Model("../Assets/Models/snowspeeder/Star Wars Snowspeeder.obj");
 	//testModel = new Model("../Assets/Models/grass/grassCube.obj");
 	//testModel = new Model("../Assets/Models/scene/scene.obj");
+	testModel = new Model("../Assets/Models/snowspeeder2/snowSpeederv2.obj");
 
 
 	sun = new DirLight(glm::vec3(-3, -9, 0), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.9f, 0.9f, 0.9f), glm::vec3(0.3f, 0.3f, 0.3f));
@@ -173,6 +177,9 @@ void Window::idle_callback()
 void Window::display_callback(GLFWwindow* window)
 {
 
+	
+
+
 	//testing
 	glm::mat4 model;
 	model = glm::mat4(1.0f);
@@ -206,9 +213,9 @@ void Window::display_callback(GLFWwindow* window)
 	// in the "MVP" uniform
 	glUniformMatrix4fv(glGetUniformLocation(depthShader, "depthMVP"), 1, GL_FALSE, &depthMVP[0][0]);
 
-	//testModel->Draw(depthShader);
+	testModel->Draw(depthShader);
 	
-	
+
 
 	glm::mat4 biasMatrix(
 		0.5, 0.0, 0.0, 0.0,
@@ -228,6 +235,11 @@ void Window::display_callback(GLFWwindow* window)
 	// Clear the color and depth buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	//draw the skybox
+	skyboxObj->drawSkyBox();
+
+	
+
 
 	glUseProgram(shadowShader);
 	glm::mat4 projection = Window::P;
@@ -237,12 +249,20 @@ void Window::display_callback(GLFWwindow* window)
 	glUniformMatrix4fv(glGetUniformLocation(shadowShader, "model"), 1, GL_FALSE, glm::value_ptr(model));
 	glUniformMatrix4fv(glGetUniformLocation(shadowShader, "DepthBiasMVP"), 1, GL_FALSE, &depthBiasMVP[0][0]);
 
-	glActiveTexture(GL_TEXTURE8);
-	glUniform1i(glGetUniformLocation(shadowShader, "shadowMap"), 8);
+	glUniform3f(glGetUniformLocation(shadowShader, "viewPos"), cam_pos.x, cam_pos.y, cam_pos.z);
+	glUniform3f(glGetUniformLocation(shadowShader, "dirLight.direction"), sun->dir.x, sun->dir.y, sun->dir.z);
+	glUniform3f(glGetUniformLocation(shadowShader, "dirLight.ambient"), sun->ambient.x, sun->ambient.y, sun->ambient.z);
+	glUniform3f(glGetUniformLocation(shadowShader, "dirLight.diffuse"), sun->diffuse.x, sun->diffuse.y, sun->diffuse.z);
+	glUniform3f(glGetUniformLocation(shadowShader, "dirLight.specular"), sun->specular.x, sun->specular.y, sun->specular.z);
+
+
+	//just throw it at the end
+	glActiveTexture(GL_TEXTURE15);
+	glUniform1i(glGetUniformLocation(shadowShader, "shadowMap"), 15);
 	glBindTexture(GL_TEXTURE_2D, depthTexture);
 
-	//draw the skybox
-	skyboxObj->drawSkyBox();
+	testModel->Draw(shadowShader);
+
 
 
 	
@@ -311,5 +331,28 @@ void Window::mouse_button_callback(GLFWwindow* window, int button, int action, i
 
 void Window::cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 {
+	glm::vec3 direction;
+	float pixel_diff;
+	float rot_angle, zoom_factor;
+	glm::vec3 curPoint;
 
+	int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT);
+	if (state == GLFW_PRESS)
+	{
+		float angle;
+		// Perform horizontal (y-axis) rotation
+		angle = (float)(prevx - xpos) / 100.0f;
+		cam_pos = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(cam_pos, 1.0f));
+		cam_up = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(cam_up, 1.0f));
+		//Now rotate vertically based on current orientation
+		angle = (float)(ypos - prevy) / 100.0f;
+		glm::vec3 axis = glm::cross((cam_pos - cam_look_at), cam_up);
+		cam_pos = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, axis) * glm::vec4(cam_pos, 1.0f));
+		cam_up = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, axis) * glm::vec4(cam_up, 1.0f));
+		// Now update the camera
+		V = glm::lookAt(cam_pos, cam_look_at, cam_up);
+	}
+
+	prevx = xpos;
+	prevy = ypos;
 }

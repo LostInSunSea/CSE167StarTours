@@ -6,6 +6,9 @@ layout (location = 2) in vec2 texCoords;
 out vec2 TexCoords;
 out vec4 ShadowCoords;
 
+out vec3 Normal;
+out vec3 FragPos;
+
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
@@ -16,4 +19,7 @@ void main()
     gl_Position = projection * view * model * vec4(position, 1.0f);
     TexCoords = texCoords;
     ShadowCoords = DepthBiasMVP * vec4(position,1.0f);
+    
+    FragPos = vec3(model * vec4(position, 1.0f));
+    Normal = mat3(transpose(inverse(model))) * normal;
 }
