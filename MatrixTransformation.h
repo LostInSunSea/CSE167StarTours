@@ -6,5 +6,7 @@ class MatrixTransformation :
 public:
 	MatrixTransformation();
 	~MatrixTransformation();
+	void draw(glm::mat4);
+	void update();
 };
 

@@ -11,8 +11,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 
-class DirLight:
-	public Node
+class DirLight
 {
 public:
 	glm::vec3 dir;

@@ -164,4 +164,9 @@ void Model::Draw(GLint shader)
 	}
 }
 
+void Model::Draw(glm::mat4 trans, GLint shader)
+{
+
+}
+
 

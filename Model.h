@@ -44,6 +44,6 @@ public:
 	~Model();
 
 	void Draw(GLint shader);
-
+	void Draw(glm::mat4 trans, GLint shader);
 };
 

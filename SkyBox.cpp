@@ -78,7 +78,7 @@ void SkyBox::init()
 	vector<const GLchar*> faces;
 	faces.push_back("../Assets/Skybox/front.png");
 	faces.push_back("../Assets/Skybox/back.png");
-	faces.push_back("../Assets/SkyBox/top.png");
+	faces.push_back("../Assets/SkyBox/up.png");
 	faces.push_back("../Assets/Skybox/down.png");
 	faces.push_back("../Assets/SkyBox/right.png");
 	faces.push_back("../Assets/SkyBox/left.png");
