@@ -81,7 +81,6 @@ public:
 	static int manip;
 	static int light;
 	static bool normal;
-
 };
 
 #endif

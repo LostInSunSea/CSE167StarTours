@@ -55,8 +55,12 @@
     <ClCompile Include="..\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\depth.frag" />
+    <None Include="..\depth.vert" />
     <None Include="..\shader.frag" />
     <None Include="..\shader.vert" />
+    <None Include="..\shadow.frag" />
+    <None Include="..\shadow.vert" />
     <None Include="..\skyShader.frag" />
     <None Include="..\skyShader.vert" />
     <None Include="packages.config" />
