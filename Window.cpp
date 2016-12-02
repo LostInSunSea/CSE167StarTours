@@ -1,5 +1,11 @@
 #include "window.h"
+#include "Node.h"
+#include "Group.h"
+#include "Component.h"
+#include "BoundingBox.h"
+#include "MatrixTransformation.h"
 #include "Model.h"
+#include "Camera.h"
 #include <glm/gtc/type_ptr.hpp>
 
 const char* window_title = "Galaxy Battles: Episode V - The Imperium's Counter Attack";
@@ -13,6 +19,7 @@ GLint skyboxShader;
 Model * testModel;
 AudioEngine * audioEngine=new AudioEngine();
 SkyBox * skyboxObj = new SkyBox();
+BoundingBox * testBox;
 
 
 // On some systems you need to change this to the absolute path
@@ -71,7 +78,7 @@ void Window::initialize_objects()
 	//testModel = new Model("../Assets/Models/snowspeeder/Star Wars Snowspeeder.obj");
 	//testModel = new Model("../Assets/Models/grass/grassCube.obj");
 	//testModel = new Model("../Assets/Models/scene/scene.obj");
-
+	testBox = new BoundingBox();
 
 	sun = new DirLight(glm::vec3(-3, -9, 0), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.9f, 0.9f, 0.9f), glm::vec3(0.3f, 0.3f, 0.3f));
 
@@ -243,7 +250,8 @@ void Window::display_callback(GLFWwindow* window)
 
 	//draw the skybox
 	skyboxObj->drawSkyBox();
-
+	glm::mat4 testMat = glm::mat4(1.0f);
+	testBox->draw(testMat, shaderProgram);
 
 	
 
