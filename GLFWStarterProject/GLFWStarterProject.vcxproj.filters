@@ -128,5 +128,17 @@
     <None Include="..\skyShader.vert">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="..\depth.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\depth.vert">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\shadow.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="..\shadow.vert">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

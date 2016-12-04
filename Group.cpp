@@ -9,16 +9,20 @@ Group::Group()
 
 Group::~Group()
 {
+
 }
 
 void Group::update()
 {
+
 }
 
-void Group::addChild()
+void Group::addChild(Node * child)
 {
+	allNodes.push_back(child);
 }
 
-void Group::removeChild()
+void Group::removeChild(Node * child)
 {
+
 }

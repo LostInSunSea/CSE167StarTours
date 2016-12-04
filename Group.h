@@ -11,7 +11,7 @@ public:
 	~Group();
 	virtual void draw(glm::mat4 trans, GLint shader)=0;
 	void update();
-	void addChild();
-	void removeChild();
+	void addChild(Node * child);
+	void removeChild(Node * child);
 };
 

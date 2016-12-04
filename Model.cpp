@@ -1,4 +1,9 @@
 #include "Model.h"
+#include "Window.h"
+extern DirLight* sun;
+extern glm::vec3 cam_pos;
+extern GLuint depthTexture;
+extern GLuint DepthFrameBuffer;
 
 GLint TextureFromFile(const char* path, std::string directory)
 {
@@ -164,9 +169,48 @@ void Model::Draw(GLint shader)
 	}
 }
 
-void Model::Draw(glm::mat4 trans, GLint shader)
+void Model::Draw(glm::mat4 model, GLint shader)
 {
+	// Use depth shader
+	glUseProgram(shader);
+	glm::vec3 lightInvDir = -(sun->dir);
+	//need to fine tune/gen automatically
+	glm::mat4 depthProjectionMatrix = glm::ortho<float>(-10, 10, -10, 10, -10, 20);
+	glm::mat4 depthViewMatrix = glm::lookAt(lightInvDir, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	//BASED OFF EACH OBJECT
+	glm::mat4 depthModelMatrix = model;
+	glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
+	// Send our transformation to the currently bound shader, 
+	// in the "MVP" uniform
+	glUniformMatrix4fv(glGetUniformLocation(shader, "depthMVP"), 1, GL_FALSE, &depthMVP[0][0]);
+	Draw(shader);
 
+	glm::mat4 biasMatrix(
+		0.5, 0.0, 0.0, 0.0,
+		0.0, 0.5, 0.0, 0.0,
+		0.0, 0.0, 0.5, 0.0,
+		0.5, 0.5, 0.5, 1.0
+	);
+	glm::mat4 depthBiasMVP = biasMatrix*depthMVP;
+
+	glUseProgram(shader);
+	glm::mat4 projection = Window::P;
+	glm::mat4 view = Window::V;
+	glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "view"), 1, GL_FALSE, glm::value_ptr(view));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "DepthBiasMVP"), 1, GL_FALSE, &depthBiasMVP[0][0]);
+
+	glUniform3f(glGetUniformLocation(shader, "viewPos"), cam_pos.x, cam_pos.y, cam_pos.z);
+	glUniform3f(glGetUniformLocation(shader, "dirLight.direction"), sun->dir.x, sun->dir.y, sun->dir.z);
+	glUniform3f(glGetUniformLocation(shader, "dirLight.ambient"), sun->ambient.x, sun->ambient.y, sun->ambient.z);
+	glUniform3f(glGetUniformLocation(shader, "dirLight.diffuse"), sun->diffuse.x, sun->diffuse.y, sun->diffuse.z);
+	glUniform3f(glGetUniformLocation(shader, "dirLight.specular"), sun->specular.x, sun->specular.y, sun->specular.z);
+
+	//just throw it at the end
+	glActiveTexture(GL_TEXTURE15);
+	glUniform1i(glGetUniformLocation(shader, "shadowMap"), 15);
+	Draw(shader);
 }
 
 
