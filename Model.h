@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <limits>
 #define GLFW_INCLUDE_GLEXT
 #ifdef __APPLE__
 #define GLFW_INCLUDE_GLCOREARB
@@ -36,7 +37,14 @@ private:
 	void processNode(aiNode * node, const aiScene * scene);
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene);
 	std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
-
+	//max
+	float maxX=-INFINITY;
+	float maxY=-INFINITY;
+	float maxZ=-INFINITY;
+	//min
+	float minX=INFINITY;
+	float minY=INFINITY;
+	float minZ=INFINITY;
 
 public:
 	Model();
@@ -45,5 +53,7 @@ public:
 
 	void Draw(GLint shader);
 	void Draw(glm::mat4 trans, GLint shader);
+	glm::vec3 getMinVec();
+	glm::vec3 getMaxVec();
 };
 

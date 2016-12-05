@@ -5,48 +5,26 @@ class BoundingBox :
 {
 private:
 	//corners
-	glm::vec3 minExtents; 
-	glm::vec3 maxExtents;
+	glm::vec3 minExtents=glm::vec3(-0.5,-0.5,-0.5); 
+	glm::vec3 maxExtents=glm::vec3(0.5,0.5,0.5);
+	glm::mat4 matrixTrans = glm::mat4(1);
 	// Define the coordinates and indices needed to draw the cube. Note that it is not necessary
 	// to use a 2-dimensional array, since the layout in memory is the same as a 1-dimensional array.
 	// This just looks nicer since it's easy to tell what coordinates/indices belong where.
-	const GLfloat vertices[108] = {
-		-1.0f,-1.0f,-1.0f, // triangle 1 : begin
-		-1.0f,-1.0f, 1.0f,
-		-1.0f, 1.0f, 1.0f, // triangle 1 : end
-		1.0f, 1.0f,-1.0f, // triangle 2 : begin
-		-1.0f,-1.0f,-1.0f,
-		-1.0f, 1.0f,-1.0f, // triangle 2 : end
-		1.0f,-1.0f, 1.0f,
-		-1.0f,-1.0f,-1.0f,
-		1.0f,-1.0f,-1.0f,
-		1.0f, 1.0f,-1.0f,
-		1.0f,-1.0f,-1.0f,
-		-1.0f,-1.0f,-1.0f,
-		-1.0f,-1.0f,-1.0f,
-		-1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f,-1.0f,
-		1.0f,-1.0f, 1.0f,
-		-1.0f,-1.0f, 1.0f,
-		-1.0f,-1.0f,-1.0f,
-		-1.0f, 1.0f, 1.0f,
-		-1.0f,-1.0f, 1.0f,
-		1.0f,-1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f,-1.0f,-1.0f,
-		1.0f, 1.0f,-1.0f,
-		1.0f,-1.0f,-1.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f,-1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f,-1.0f,
-		-1.0f, 1.0f,-1.0f,
-		1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f,-1.0f,
-		-1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f, 1.0f,
-		1.0f,-1.0f, 1.0f
+	// Define the coordinates and indices needed to draw the cube. Note that it is not necessary
+	// to use a 2-dimensional array, since the layout in memory is the same as a 1-dimensional array.
+	// This just looks nicer since it's easy to tell what coordinates/indices belong where.
+	const GLfloat vertices[20][3] = {
+		// "Front" vertices a,b,c,d
+		{ -0.5, -0.5,  0.5 },{ 0.5, -0.5,  0.5 },{ 0.5,  0.5,  0.5 },{ -0.5,  0.5,  0.5 },
+		// "Back" vertices e,f,g,h
+		{ -0.5, -0.5, -0.5 },{ 0.5, -0.5, -0.5 },{ 0.5,  0.5, -0.5 },{ -0.5,  0.5, -0.5 },
+		//a e b f 
+		{ -0.5, -0.5,  0.5 },{ -0.5, -0.5, -0.5 },{ 0.5, -0.5,  0.5 },{ 0.5, -0.5, -0.5 },
+		//c g d h
+		{ 0.5,  0.5,  0.5 },{ 0.5,  0.5, -0.5 },{ -0.5,  0.5,  0.5 },{ -0.5,  0.5, -0.5 },
+		//a d e h
+		{ -0.5, -0.5,  0.5 },{ -0.5,  0.5,  0.5 },{ -0.5, -0.5, -0.5 },{ -0.5,  0.5, -0.5 }
 	};
 
 	// Note that GL_QUADS is deprecated in modern OpenGL (and removed from OSX systems).
@@ -77,9 +55,10 @@ public:
 	~BoundingBox();
 	glm::vec3 getMaxExtents();
 	glm::vec3 getMinExtents();
+	glm::mat4 getTransMatrix();
 	void setMaxExtents(glm::vec3 max);
 	void setMinExtents(glm::vec3 min);
-	bool aabbTest(BoundingBox other);
+	bool aabbTest(BoundingBox * other);
 	void update();
 	void draw(glm::mat4, GLint shader);
 	void init();
