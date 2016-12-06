@@ -15,6 +15,7 @@ GLint testShader;
 GLint depthShader;
 GLint shadowShader;
 GLint skyboxShader;
+GLint quadShader;
 
 Model * testModel;
 AudioEngine * audioEngine=new AudioEngine();
@@ -30,6 +31,10 @@ DirLight * sun;
 GLuint DepthFrameBuffer = 0;
 GLuint depthTexture;
 
+//quad to draw shadow map
+GLuint quadVAO;
+GLuint quadVBO;
+
 // On some systems you need to change this to the absolute path
 #define VERTEX_SHADER_PATH "../shader.vert"
 #define FRAGMENT_SHADER_PATH "../shader.frag"
@@ -41,6 +46,8 @@ GLuint depthTexture;
 #define SHADOW_FRAGMENT_SHADER "../shadow.frag"
 #define SKYBOX_VERTEX_SHADER_PATH "../skyShader.vert"
 #define SKYBOX_FRAGMENT_SHADER_PATH "../skyShader.frag"
+#define QUAD_VERTEX_SHADER_PATH "../quad.vert"
+#define QUAD_FRAGMENT_SHADER_PATH "../quad.frag"
 
 
 // Default camera parameters
@@ -73,6 +80,7 @@ void Window::initialize_objects()
 	depthShader = LoadShaders(DEPTH_VERTEX_SHADER, DEPTH_FRAGMENT_SHADER);
 	shadowShader = LoadShaders(SHADOW_VERTEX_SHADER, SHADOW_FRAGMENT_SHADER);
 	skyboxShader = LoadShaders(SKYBOX_VERTEX_SHADER_PATH, SKYBOX_FRAGMENT_SHADER_PATH);
+	quadShader = LoadShaders(QUAD_VERTEX_SHADER_PATH, QUAD_FRAGMENT_SHADER_PATH);
 
 	skyboxObj->init();
 
@@ -110,6 +118,24 @@ void Window::initialize_objects()
 	{
 		exit(1);
 	}
+
+	//setup quad
+	glGenVertexArrays(1, &quadVAO);
+	glBindVertexArray(quadVAO);
+
+	GLfloat quadData[] = {
+		-1.0f, -1.0f, 0.0f,
+		1.0f, -1.0f, 0.0f,
+		-1.0f,  1.0f, 0.0f,
+		-1.0f,  1.0f, 0.0f,
+		1.0f, -1.0f, 0.0f,
+		1.0f,  1.0f, 0.0f,
+	};
+
+	glGenBuffers(1, &quadVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadData), quadData, GL_STATIC_DRAW);
+	glBindVertexArray(0);
 }
 
 
@@ -238,6 +264,39 @@ void Window::display_callback(GLFWwindow* window)
 	trans1 = glm::translate(model, glm::vec3(4.0f, 4.0f, 4.0f));
 	trans1 = glm::scale(trans1, scaleVec);	// It's a bit too big for our scene, so scale it down
 	testBox1->draw(trans1, shaderProgram);
+
+
+
+
+	// display quad
+
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, 256, 256);
+	glUseProgram(quadShader);
+
+	// Bind our texture in Texture Unit 0
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, depthTexture);
+	// Set our "renderedTexture" sampler to user Texture Unit 0
+	glUniform1i(glGetUniformLocation(quadShader, "quadtexture"), 0);
+
+	// 1rst attribute buffer : vertices
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+	glVertexAttribPointer(
+		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+		3,                  // size
+		GL_FLOAT,           // type
+		GL_FALSE,           // normalized?
+		0,                  // stride
+		(void*)0            // array buffer offset
+	);
+
+	// Draw the triangles !
+	glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
+
+	glDisableVertexAttribArray(0);
 
 
 	// Gets events, including input such as keyboard and mouse or window resizing
