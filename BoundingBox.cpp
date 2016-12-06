@@ -28,6 +28,11 @@ glm::vec3 BoundingBox::getMinExtents()
 	return minExtents;
 }
 
+glm::mat4 BoundingBox::getTransMatrix()
+{
+	return matrixTrans;
+}
+
 void BoundingBox::setMaxExtents(glm::vec3 max)
 {
 	maxExtents = max;
@@ -38,18 +43,61 @@ void BoundingBox::setMinExtents(glm::vec3 min)
 	minExtents = min;
 }
 
-bool BoundingBox::aabbTest(BoundingBox other)
+bool BoundingBox::aabbTest(BoundingBox* other)
 {
-	glm::vec3 distance1 = other.getMinExtents() - maxExtents;
-	glm::vec3 distance2 = other.minExtents - other.getMaxExtents();
+	glm::vec4 thisMinExtents = matrixTrans * glm::vec4(minExtents,1.0f);
+	glm::vec4 thisMaxExtents = matrixTrans * glm::vec4(maxExtents, 1.0f);
+	glm::vec4 othrMinExtents = other->getTransMatrix() * glm::vec4(other->getMinExtents(), 1.0f);
+	glm::vec4 othrMaxExtents = other->getTransMatrix() * glm::vec4(other->getMaxExtents(), 1.0f);
+
+	glm::vec3 distance1 = glm::vec3(othrMinExtents - thisMaxExtents);
+	glm::vec3 distance2 = glm::vec3(thisMinExtents - othrMaxExtents);
 	glm::vec3 distance = glm::max(distance1, distance2);
+	
+	if (other->getTransMatrix() == matrixTrans) {
+		cout << "hello world";
+	}
+
+	cout << "-----------------------------------" << endl;
+	cout << "distance 1: "<< endl;
+	cout << "x: " << distance1.x << endl;
+	cout << "y: " << distance1.y << endl;
+	cout << "z: " << distance1.z << endl;
+	cout << "distance 2: " << endl;
+	cout << "x: " << distance2.x << endl;
+	cout << "y: " << distance2.y << endl;
+	cout << "z: " << distance2.z << endl;
+
+	cout << "this min: " << endl;
+	cout << "x: " << thisMinExtents.x << endl;
+	cout << "y: " << thisMinExtents.y << endl;
+	cout << "z: " << thisMinExtents.z << endl;
+	cout << "this max: " << endl;
+	cout << "x: " << thisMaxExtents.x << endl;
+	cout << "y: " << thisMaxExtents.y << endl;
+	cout << "z: " << thisMaxExtents.z << endl;
+	cout << "othr min: " << endl;
+	cout << "x: " << othrMinExtents.x << endl;
+	cout << "y: " << othrMinExtents.y << endl;
+	cout << "z: " << othrMinExtents.z << endl;
+	cout << "othr max: " << endl;
+	cout << "x: " << othrMaxExtents.x << endl;
+	cout << "y: " << othrMaxExtents.y << endl;
+	cout << "z: " << othrMaxExtents.z << endl;
+
 	float maxDistance;
 	float temp = max(distance.x, distance.y);
 	maxDistance = max(temp, distance.z);
+	cout << "distance:" << maxDistance << endl;
 	if (maxDistance < 0) {
+		cout << "intersect: 1" << endl;
+		cout << "-----------------------------------"<<endl;
 		return true;
 	}
 	else {
+		cout << "intersect: 0" << endl;
+		cout << "-----------------------------------" << endl;
+
 		return false;
 	}
 }
@@ -63,6 +111,7 @@ void BoundingBox::draw(glm::mat4 trans, GLint shaderProgram)
 	glUseProgram(shaderProgram);
 	// Calculate the combination of the model and view (camera inverse) matrices
 	glm::mat4 modelview = Window::V * trans;
+	matrixTrans = trans;
 	// We need to calcullate this because modern OpenGL does not keep track of any matrix other than the viewport (D)
 	// Consequently, we need to forward the projection, view, and model matrices to the shader programs
 	// Get the location of the uniform variables "projection" and "modelview"

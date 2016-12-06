@@ -4,6 +4,8 @@ extern DirLight* sun;
 extern glm::vec3 cam_pos;
 extern GLuint depthTexture;
 extern GLuint DepthFrameBuffer;
+extern GLint depthShader;
+extern GLint shadowShader;
 
 extern GLint depthShader;
 extern GLint shadowShader;
@@ -86,7 +88,6 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 	for (GLuint i = 0; i < mesh->mNumVertices; i++)
 	{
 		Vertex vertex;
-
 		vertex.Position.x = mesh->mVertices[i].x;
 		vertex.Position.y = mesh->mVertices[i].y;
 		vertex.Position.z = mesh->mVertices[i].z;
@@ -94,6 +95,30 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 		vertex.Normal.x = mesh->mNormals[i].x;
 		vertex.Normal.y = mesh->mNormals[i].y;
 		vertex.Normal.z = mesh->mNormals[i].z;
+
+		//---------------------------------------
+		//x
+		if (vertex.Position.x>maxX) {
+			maxX = vertex.Position.x;
+		}
+		else if (vertex.Position.x<minX) {
+			minX = vertex.Position.x;
+		}
+		//y
+		if (vertex.Position.y>maxY) {
+			maxY = vertex.Position.y;
+		}
+		else if (vertex.Position.y<minY) {
+			minY = vertex.Position.y;
+		}
+		//y
+		if (vertex.Position.z>maxZ) {
+			maxZ = vertex.Position.z;
+		}
+		else if (vertex.Position.z<minZ) {
+			minZ = vertex.Position.z;
+		}
+		//---------------------------------------
 
 		if (mesh->mTextureCoords[0]) // Does the mesh contain texture coordinates?
 		{
@@ -174,7 +199,6 @@ void Model::Draw(GLint shader)
 
 void Model::Draw(glm::mat4 model, GLint shader)
 {
-	// Use depth shader
 	glUseProgram(shader);
 	glm::vec3 lightInvDir = -(sun->dir);
 	//need to fine tune/gen automatically
@@ -199,28 +223,40 @@ void Model::Draw(glm::mat4 model, GLint shader)
 		0.0, 0.0, 0.5, 0.0,
 		0.5, 0.5, 0.5, 1.0
 	);
-	glm::mat4 depthBiasMVP = biasMatrix*depthMVP;
 
-	glUseProgram(shader);
+	glm::mat4 depthBiasMVP = biasMatrix*depthMVP;
 	glm::mat4 projection = Window::P;
 	glm::mat4 view = Window::V;
-	glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-	glUniformMatrix4fv(glGetUniformLocation(shader, "view"), 1, GL_FALSE, glm::value_ptr(view));
-	glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
-	glUniformMatrix4fv(glGetUniformLocation(shader, "DepthBiasMVP"), 1, GL_FALSE, &depthBiasMVP[0][0]);
-
-	glUniform3f(glGetUniformLocation(shader, "viewPos"), cam_pos.x, cam_pos.y, cam_pos.z);
-	glUniform3f(glGetUniformLocation(shader, "dirLight.direction"), sun->dir.x, sun->dir.y, sun->dir.z);
-	glUniform3f(glGetUniformLocation(shader, "dirLight.ambient"), sun->ambient.x, sun->ambient.y, sun->ambient.z);
-	glUniform3f(glGetUniformLocation(shader, "dirLight.diffuse"), sun->diffuse.x, sun->diffuse.y, sun->diffuse.z);
-	glUniform3f(glGetUniformLocation(shader, "dirLight.specular"), sun->specular.x, sun->specular.y, sun->specular.z);
 
 	//just throw it at the end
-	
-	glActiveTexture(GL_TEXTURE15);
-	glUniform1i(glGetUniformLocation(shader, "shadowMap"), 15);
-	glBindTexture(GL_TEXTURE_2D, depthTexture);
-	Draw(shader);
+	if (shader == shadowShader) {
+		glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+		glUniformMatrix4fv(glGetUniformLocation(shader, "view"), 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		glUniformMatrix4fv(glGetUniformLocation(shader, "DepthBiasMVP"), 1, GL_FALSE, &depthBiasMVP[0][0]);
+
+		glUniform3f(glGetUniformLocation(shader, "viewPos"), cam_pos.x, cam_pos.y, cam_pos.z);
+		glUniform3f(glGetUniformLocation(shader, "dirLight.direction"), sun->dir.x, sun->dir.y, sun->dir.z);
+		glUniform3f(glGetUniformLocation(shader, "dirLight.ambient"), sun->ambient.x, sun->ambient.y, sun->ambient.z);
+		glUniform3f(glGetUniformLocation(shader, "dirLight.diffuse"), sun->diffuse.x, sun->diffuse.y, sun->diffuse.z);
+		glUniform3f(glGetUniformLocation(shader, "dirLight.specular"), sun->specular.x, sun->specular.y, sun->specular.z);
+		glActiveTexture(GL_TEXTURE15);
+		glUniform1i(glGetUniformLocation(shader, "shadowMap"), 15);
+		glBindTexture(GL_TEXTURE_2D, depthTexture);
+		Draw(shader);
+	}
+}
+
+glm::vec3 Model::getMinVec()
+{
+	glm::vec3 minVec = glm::vec3(minX, minY, minZ);
+	return minVec;
+}
+
+glm::vec3 Model::getMaxVec()
+{
+	glm::vec3 maxVec = glm::vec3(maxX, maxY, maxZ);
+	return maxVec;
 }
 
 

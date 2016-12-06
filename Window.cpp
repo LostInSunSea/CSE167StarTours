@@ -79,9 +79,11 @@ void Window::initialize_objects()
 	//testModel = new Model("../Assets/Models/nanosuit/nanosuit.obj");
 	//testModel = new Model("../Assets/Models/snowspeeder/Star Wars Snowspeeder.obj");
 	//testModel = new Model("../Assets/Models/grass/grassCube.obj");
-	testModel = new Model("../Assets/Models/scene/scene.obj");
+	//testModel = new Model("../Assets/Models/scene/scene.obj");
 
 	//testModel = new Model("../Assets/Models/snowspeeder2/snowSpeederv2.obj");
+	//testModel = new Model("../Assets/Models/scene/scene.obj");
+	testModel = new Model("../Assets/Models/snowspeeder2/snowSpeederv2.obj");
 	testBox = new BoundingBox();
 	testBox1 = new BoundingBox();
 
@@ -109,6 +111,7 @@ void Window::initialize_objects()
 		exit(1);
 	}
 }
+
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void Window::clean_up()
@@ -184,95 +187,11 @@ void Window::idle_callback()
 
 void Window::display_callback(GLFWwindow* window)
 {
-	/*
-	glm::mat4 model;
-	model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Translate it down a bit so it's at the center of the scene
-	model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));	// It's a bit too big for our scene, so scale it down
-															//Draw depth buffer
-	glBindFramebuffer(GL_FRAMEBUFFER, DepthFrameBuffer);
-	glViewport(0, 0, 1024, 1024);
-
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK); // Cull back-facing triangles
-
-						 // Clear the screen
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	// Use depth shader
-	glUseProgram(depthShader);
-
-	glm::vec3 lightInvDir = -(sun->dir);
-
-	//need to fine tune/gen automatically
-	glm::mat4 depthProjectionMatrix = glm::ortho<float>(-10, 10, -10, 10, -10, 20);
-	glm::mat4 depthViewMatrix = glm::lookAt(lightInvDir, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-
-
-	//BASED OFF EACH OBJECT
-	glm::mat4 depthModelMatrix = model;
-	glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
-
-	// Send our transformation to the currently bound shader, 
-	// in the "MVP" uniform
-	glUniformMatrix4fv(glGetUniformLocation(depthShader, "depthMVP"), 1, GL_FALSE, &depthMVP[0][0]);
-
-	testModel->Draw(depthShader);
-
-
-
-	glm::mat4 biasMatrix(
-		0.5, 0.0, 0.0, 0.0,
-		0.0, 0.5, 0.0, 0.0,
-		0.0, 0.0, 0.5, 0.0,
-		0.5, 0.5, 0.5, 1.0
-	);
-	glm::mat4 depthBiasMVP = biasMatrix*depthMVP;
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	Window::resize_callback(window, width, height); // Render on the whole framebuffer, complete from the lower left corner to the upper right
-
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK); // Cull back-facing triangles -> draw only front-facing triangles
-
-
-						 // Clear the color and depth buffers
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	//draw the skybox
-	skyboxObj->drawSkyBox();
-
-
-
-
-	glUseProgram(shadowShader);
-	glm::mat4 projection = Window::P;
-	glm::mat4 view = Window::V;
-	glUniformMatrix4fv(glGetUniformLocation(shadowShader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-	glUniformMatrix4fv(glGetUniformLocation(shadowShader, "view"), 1, GL_FALSE, glm::value_ptr(view));
-	glUniformMatrix4fv(glGetUniformLocation(shadowShader, "model"), 1, GL_FALSE, glm::value_ptr(model));
-	glUniformMatrix4fv(glGetUniformLocation(shadowShader, "DepthBiasMVP"), 1, GL_FALSE, &depthBiasMVP[0][0]);
-
-	glUniform3f(glGetUniformLocation(shadowShader, "viewPos"), cam_pos.x, cam_pos.y, cam_pos.z);
-	glUniform3f(glGetUniformLocation(shadowShader, "dirLight.direction"), sun->dir.x, sun->dir.y, sun->dir.z);
-	glUniform3f(glGetUniformLocation(shadowShader, "dirLight.ambient"), sun->ambient.x, sun->ambient.y, sun->ambient.z);
-	glUniform3f(glGetUniformLocation(shadowShader, "dirLight.diffuse"), sun->diffuse.x, sun->diffuse.y, sun->diffuse.z);
-	glUniform3f(glGetUniformLocation(shadowShader, "dirLight.specular"), sun->specular.x, sun->specular.y, sun->specular.z);
-
-
-	//just throw it at the end
-	glActiveTexture(GL_TEXTURE15);
-	glUniform1i(glGetUniformLocation(shadowShader, "shadowMap"), 15);
-	glBindTexture(GL_TEXTURE_2D, depthTexture);
-
-	testModel->Draw(shadowShader);
-	*/
 	
 	glm::mat4 model = glm::mat4(1.0f);
 	model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Translate it down a bit so it's at the center of the scene
 	model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));	// It's a bit too big for our scene, so scale it down
-															//Draw depth buffer
-
+	//draw the buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, DepthFrameBuffer);
 	glViewport(0, 0, 1024, 1024);
 
@@ -288,7 +207,6 @@ void Window::display_callback(GLFWwindow* window)
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	Window::resize_callback(window, width, height); // Render on the whole framebuffer, complete from the lower left corner to the upper right
-
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK); // Cull back-facing triangles -> draw only front-facing triangles
 						 // Clear the color and depth buffers
@@ -297,10 +215,6 @@ void Window::display_callback(GLFWwindow* window)
 
 	//draw the skybox
 	skyboxObj->drawSkyBox();
-
-
-
-	
 	//draw model shadow shader
 	testModel->Draw(model, shadowShader);
 	
@@ -311,6 +225,21 @@ void Window::display_callback(GLFWwindow* window)
 															//Draw depth buffer
 	testBox->draw(trans,shaderProgram);
 	*/
+	//setup box size
+	glm::mat4 trans = glm::mat4(1.0f);
+	glm::vec3 minVec = testModel->getMinVec();
+	glm::vec3 maxVec = testModel->getMaxVec();
+	glm::vec3 scaleVec = maxVec - minVec;
+	trans = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Translate it down a bit so it's at the center of the scene
+	trans = glm::scale(trans, scaleVec);	// It's a bit too big for our scene, so scale it down
+	testBox->draw(trans, shaderProgram);
+	//draw second box
+	glm::mat4 trans1 = glm::mat4(1.0f);
+	trans1 = glm::translate(model, glm::vec3(4.0f, 4.0f, 4.0f));
+	trans1 = glm::scale(trans1, scaleVec);	// It's a bit too big for our scene, so scale it down
+	testBox1->draw(trans1, shaderProgram);
+
+
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
 	// Swap buffers
@@ -330,6 +259,31 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		}
 		if (key == GLFW_KEY_K) {
 			audioEngine->setChannelVolume(0, 2.0f);
+		}
+		if (key == GLFW_KEY_T) {
+			/*
+			//test 1 no
+			testBox->setMinExtents(glm::vec3(0.0f, 0.0f, 0.0f));
+			testBox->setMaxExtents(glm::vec3(1.0f, 1.0f, 1.0f));
+			testBox1->setMinExtents(glm::vec3(1.0f, 1.0f, 1.0f));
+			testBox1->setMaxExtents(glm::vec3(2.0f, 2.0f, 2.0f));
+			testBox->aabbTest(testBox1);
+			//test 2 no
+			testBox->setMinExtents(glm::vec3(0.0f, 0.0f, 0.0f));
+			testBox->setMaxExtents(glm::vec3(1.0f, 1.0f, 1.0f));
+			testBox1->setMinExtents(glm::vec3(1.0f, 0.0f, 0.0f));
+			testBox1->setMaxExtents(glm::vec3(2.0f, 1.0f, 1.0f));
+			testBox->aabbTest(testBox1);
+
+			//test 3 yes
+			testBox->setMinExtents(glm::vec3(0.0f, 0.0f, 0.0f));
+			testBox->setMaxExtents(glm::vec3(1.0f, 1.0f, 1.0f));
+			testBox1->setMinExtents(glm::vec3(0.0f, 0.5f, 0.0f));
+			testBox1->setMaxExtents(glm::vec3(1.0f, 1.5f, 1.0f));
+			testBox->aabbTest(testBox1);
+			*/
+			testBox->aabbTest(testBox1);
+
 		}
 	}
 }
@@ -371,3 +325,7 @@ void Window::cursor_position_callback(GLFWwindow* window, double xpos, double yp
 	prevx = xpos;
 	prevy = ypos;
 }
+
+/*
+
+*/
