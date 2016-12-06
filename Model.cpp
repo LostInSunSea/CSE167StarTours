@@ -5,6 +5,9 @@ extern glm::vec3 cam_pos;
 extern GLuint depthTexture;
 extern GLuint DepthFrameBuffer;
 
+extern GLint depthShader;
+extern GLint shadowShader;
+
 GLint TextureFromFile(const char* path, std::string directory)
 {
 	//Generate texture ID and load texture data 
@@ -182,8 +185,13 @@ void Model::Draw(glm::mat4 model, GLint shader)
 	glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
 	// Send our transformation to the currently bound shader, 
 	// in the "MVP" uniform
-	glUniformMatrix4fv(glGetUniformLocation(shader, "depthMVP"), 1, GL_FALSE, &depthMVP[0][0]);
-	Draw(shader);
+	if (shader == depthShader)
+	{
+
+		glUniformMatrix4fv(glGetUniformLocation(shader, "depthMVP"), 1, GL_FALSE, &depthMVP[0][0]);
+		Draw(shader);
+		return;
+	}
 
 	glm::mat4 biasMatrix(
 		0.5, 0.0, 0.0, 0.0,
@@ -208,8 +216,10 @@ void Model::Draw(glm::mat4 model, GLint shader)
 	glUniform3f(glGetUniformLocation(shader, "dirLight.specular"), sun->specular.x, sun->specular.y, sun->specular.z);
 
 	//just throw it at the end
+	
 	glActiveTexture(GL_TEXTURE15);
 	glUniform1i(glGetUniformLocation(shader, "shadowMap"), 15);
+	glBindTexture(GL_TEXTURE_2D, depthTexture);
 	Draw(shader);
 }
 
