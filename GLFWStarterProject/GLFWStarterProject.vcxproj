@@ -32,6 +32,7 @@
     <ClInclude Include="..\Model.h" />
     <ClInclude Include="..\Node.h" />
     <ClInclude Include="..\OBJObject.h" />
+    <ClInclude Include="..\ParticleSystem.h" />
     <ClInclude Include="..\shader.h" />
     <ClInclude Include="..\SkyBox.h" />
     <ClInclude Include="..\Spawner.h" />
@@ -51,6 +52,7 @@
     <ClCompile Include="..\Model.cpp" />
     <ClCompile Include="..\Node.cpp" />
     <ClCompile Include="..\OBJObject.cpp" />
+    <ClCompile Include="..\ParticleSystem.cpp" />
     <ClCompile Include="..\shader.cpp" />
     <ClCompile Include="..\SkyBox.cpp" />
     <ClCompile Include="..\Spawner.cpp" />
@@ -59,6 +61,8 @@
   <ItemGroup>
     <None Include="..\depth.frag" />
     <None Include="..\depth.vert" />
+    <None Include="..\particleShader.frag" />
+    <None Include="..\particleShader.vert" />
     <None Include="..\shader.frag" />
     <None Include="..\shader.vert" />
     <None Include="..\shadow.frag" />

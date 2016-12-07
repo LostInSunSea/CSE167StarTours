@@ -108,32 +108,21 @@ void BoundingBox::update()
 
 void BoundingBox::draw(glm::mat4 trans, GLint shaderProgram)
 {
-	glUseProgram(shaderProgram);
+	GLint shaderProg = 3;
+	glUseProgram(shaderProg);
 	// Calculate the combination of the model and view (camera inverse) matrices
 	glm::mat4 modelview = Window::V * trans;
 	matrixTrans = trans;
 	// We need to calcullate this because modern OpenGL does not keep track of any matrix other than the viewport (D)
 	// Consequently, we need to forward the projection, view, and model matrices to the shader programs
 	// Get the location of the uniform variables "projection" and "modelview"
-	uProjection = glGetUniformLocation(shaderProgram, "projection");
-	uModelview = glGetUniformLocation(shaderProgram, "modelview");
+	uProjection = glGetUniformLocation(shaderProg, "projection");
+	uModelview = glGetUniformLocation(shaderProg, "modelview");
 	// Now send these values to the shader program
 	glUniformMatrix4fv(uProjection, 1, GL_FALSE, &Window::P[0][0]);
 	glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
 
-	glUniform3f(glGetUniformLocation(shaderProgram, "viewPos"), 0, 0, 20.0f);
-	glUniform3f(glGetUniformLocation(shaderProgram, "dirLight.direction"), Window::dirLight.dir.x, Window::dirLight.dir.y, Window::dirLight.dir.z);
-	glUniform3f(glGetUniformLocation(shaderProgram, "dirLight.ambient"), Window::dirLight.ambient.x, Window::dirLight.ambient.y, Window::dirLight.ambient.z);
-	glUniform3f(glGetUniformLocation(shaderProgram, "dirLight.diffuse"), Window::dirLight.diffuse.x, Window::dirLight.diffuse.y, Window::dirLight.diffuse.z);
-	glUniform3f(glGetUniformLocation(shaderProgram, "dirLight.specular"), Window::dirLight.specular.x, Window::dirLight.specular.y, Window::dirLight.specular.z);
-
-
-	glUniform3f(glGetUniformLocation(shaderProgram, "dirLight.direction"), 0, -1, 0);
-	glUniform3f(glGetUniformLocation(shaderProgram, "dirLight.ambient"), 0.5f, 0.5f, 0.5f);
-	glUniform3f(glGetUniformLocation(shaderProgram, "dirLight.diffuse"), 1.0f, 1.0f, 1.0f);
-	glUniform3f(glGetUniformLocation(shaderProgram, "dirLight.specular"), 1.0f, 1.0f, 1.0f);
-
-
+	glUniform3f(glGetUniformLocation(shaderProg, "viewPos"), 0, 0, 20.0f);
 	// Now draw the cube. We simply need to bind the VAO associated with it.
 	glBindVertexArray(VAO);
 	// Tell OpenGL to draw with triangles, using 36 indices, the type of the indices, and the offset to start from
