@@ -6,6 +6,7 @@
 #include "MatrixTransformation.h"
 #include "Model.h"
 #include "Camera.h"
+#include "Spawner.h"
 #include <glm/gtc/type_ptr.hpp>
 
 const char* window_title = "Galaxy Battles: Episode V - The Imperium's Counter Attack";
@@ -16,6 +17,7 @@ GLint depthShader;
 GLint shadowShader;
 GLint skyboxShader;
 GLint quadShader;
+GLint laserShader;
 
 
 MatrixTransformation * world;
@@ -24,8 +26,14 @@ MatrixTransformation * testObj;
 MatrixTransformation * testRot;
 MatrixTransformation * speederMT;
 MatrixTransformation * speederRot;
+MatrixTransformation * laserMT;
+MatrixTransformation * laserWorld;
+MatrixTransformation * gunMTL;
+MatrixTransformation * gunMTR;
+Spawner * gun;
 Camera * camera;
 
+Model * laser;
 Model * terrain;
 Model * speederModel;
 Model * testModel;
@@ -59,6 +67,8 @@ GLuint quadVBO;
 #define SKYBOX_FRAGMENT_SHADER_PATH "../skyShader.frag"
 #define QUAD_VERTEX_SHADER_PATH "../quad.vert"
 #define QUAD_FRAGMENT_SHADER_PATH "../quad.frag"
+#define LASER_VERTEX_SHADER_PATH "../laser.vert"
+#define LASER_FRAGMENT_SHADER_PATH "../laser.frag"
 
 #define SHADOW_MAP_RES 2048
 
@@ -95,6 +105,7 @@ void Window::initialize_objects()
 	shadowShader = LoadShaders(SHADOW_VERTEX_SHADER, SHADOW_FRAGMENT_SHADER);
 	skyboxShader = LoadShaders(SKYBOX_VERTEX_SHADER_PATH, SKYBOX_FRAGMENT_SHADER_PATH);
 	quadShader = LoadShaders(QUAD_VERTEX_SHADER_PATH, QUAD_FRAGMENT_SHADER_PATH);
+	laserShader = LoadShaders(LASER_VERTEX_SHADER_PATH, LASER_FRAGMENT_SHADER_PATH);
 
 	skyboxObj->init();
 
@@ -107,6 +118,7 @@ void Window::initialize_objects()
 	//testModel = new Model("../Assets/Models/scene/scene.obj");
 	speederModel = new Model("../Assets/Models/snowspeeder2/snowSpeederv2.obj");
 	terrain = new Model("../Assets/Models/terrain/terrain.obj");
+	laser = new Model("../Assets/Models/laser/laser.obj");
 
 	world = new MatrixTransformation();
 	testObj = new MatrixTransformation();
@@ -114,6 +126,11 @@ void Window::initialize_objects()
 	terrainMT = new MatrixTransformation();
 	speederMT = new MatrixTransformation();
 	speederRot = new MatrixTransformation();
+	laserMT = new MatrixTransformation();
+	laserWorld = new MatrixTransformation();
+	gunMTL = new MatrixTransformation();
+	gunMTR = new MatrixTransformation();
+	gun = new Spawner(laserMT);
 	camera = new Camera();
 	world->addChild(terrainMT);
 	terrainMT->addChild(terrain);
@@ -132,7 +149,15 @@ void Window::initialize_objects()
 	terrainMT->M = glm::scale(glm::mat4(1.0f), glm::vec3(5, 1, 5));
 	speederMT->M = glm::translate(glm::mat4(1.0f), glm::vec3(0, 50, 0));
 
-
+	//laserWorld->addChild(laserMT);
+	laserMT->addChild(laser);
+	//laserMT->M = glm::translate(glm::mat4(1.0f), glm::vec3(0, 50, 0));
+	gunMTL->M = glm::translate(glm::mat4(1.0f), glm::vec3(1.7f, -0.4f, -2.0f));
+	gunMTR->M = glm::translate(glm::mat4(1.0f), glm::vec3(-1.7f, -0.4f, -2.0f));
+	gunMTL->addChild(gun);
+	gunMTR->addChild(gun);
+	speederMT->addChild(gunMTL);
+	speederMT->addChild(gunMTR);
 
 
 	testBox = new BoundingBox();
@@ -256,10 +281,19 @@ void Window::idle_callback()
 {
 	//update
 	speederMT->M = glm::translate(speederMT->M, glm::vec3(0, 0, -0.1f));
+
+	for (Node * n : laserWorld->allNodes)
+	{
+		if (MatrixTransformation * mt = dynamic_cast<MatrixTransformation *>(n))
+		{
+			mt->M = glm::translate(mt->M, glm::vec3(0, 0, -0.5f));
+		}
+	}
 	
 	//testRot->M = glm::rotate(testRot->M, 0.1f, glm::vec3(0, 1, 0));
 	//testObj->M = glm::translate(testObj->M, glm::vec3(0, 0, -0.1f));
 	world->update(glm::mat4(1.0f));
+	gun->spawn = false;
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -318,7 +352,7 @@ void Window::display_callback(GLFWwindow* window)
 	testBox1->draw(trans1, shaderProgram);
 
 
-
+	laserWorld->draw(model, laserShader);
 
 	// display quad
 
@@ -407,7 +441,11 @@ void Window::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 
 void Window::mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
-
+	int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT);
+	if (state == GLFW_PRESS)
+	{
+		gun->spawn = true;
+	}
 }
 
 void Window::cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
@@ -439,6 +477,8 @@ void Window::cursor_position_callback(GLFWwindow* window, double xpos, double yp
 		V = glm::lookAt(cam_pos, cam_look_at, cam_up);
 		*/
 	}
+
+	
 
 	prevx = xpos;
 	prevy = ypos;

@@ -7,9 +7,7 @@ extern GLuint depthTexture;
 extern GLuint DepthFrameBuffer;
 extern GLint depthShader;
 extern GLint shadowShader;
-
-extern GLint depthShader;
-extern GLint shadowShader;
+extern GLint laserShader;
 
 GLint TextureFromFile(const char* path, std::string directory)
 {
@@ -231,7 +229,7 @@ void Model::draw(glm::mat4 model, GLint shader)
 	glm::mat4 view = Window::V;
 
 	//just throw it at the end
-	if (shader == shadowShader) {
+	if (shader == shadowShader || shader == laserShader) {
 		glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(glGetUniformLocation(shader, "view"), 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
