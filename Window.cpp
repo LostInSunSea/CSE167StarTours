@@ -22,9 +22,12 @@ MatrixTransformation * world;
 MatrixTransformation * terrainMT;
 MatrixTransformation * testObj;
 MatrixTransformation * testRot;
+MatrixTransformation * speederMT;
+MatrixTransformation * speederRot;
 Camera * camera;
 
 Model * terrain;
+Model * speederModel;
 Model * testModel;
 AudioEngine * audioEngine=new AudioEngine();
 SkyBox * skyboxObj = new SkyBox();
@@ -100,25 +103,34 @@ void Window::initialize_objects()
 	//testModel = new Model("../Assets/Models/grass/grassCube.obj");
 	//testModel = new Model("../Assets/Models/scene/scene.obj");
 
-	//testModel = new Model("../Assets/Models/snowspeeder2/snowSpeederv2.obj");
-	//testModel = new Model("../Assets/Models/scene/scene.obj");
 	testModel = new Model("../Assets/Models/snowspeeder2/snowSpeederv2.obj");
+	//testModel = new Model("../Assets/Models/scene/scene.obj");
+	speederModel = new Model("../Assets/Models/snowspeeder2/snowSpeederv2.obj");
 	terrain = new Model("../Assets/Models/terrain/terrain.obj");
 
 	world = new MatrixTransformation();
 	testObj = new MatrixTransformation();
 	testRot = new MatrixTransformation();
 	terrainMT = new MatrixTransformation();
+	speederMT = new MatrixTransformation();
+	speederRot = new MatrixTransformation();
 	camera = new Camera();
-	world->addChild(testObj);
 	world->addChild(terrainMT);
 	terrainMT->addChild(terrain);
-	testObj->addChild(testRot);
-	testRot->addChild(testModel);
-	testObj->addChild(camera);
+
+	speederRot->M = glm::rotate(speederRot->M, 90.0f / 180.0f * glm::pi<float>(), glm::vec3(0, 1, 0));
+	speederRot->addChild(speederModel);
+	
+	speederMT->addChild(speederRot);
+	speederMT->addChild(camera);
+	world->addChild(speederMT);
+
+	//testObj->addChild(testRot);
+	//testRot->addChild(testModel);
+	//testObj->addChild(camera);
 
 	terrainMT->M = glm::scale(glm::mat4(1.0f), glm::vec3(5, 1, 5));
-	testObj->M = glm::translate(glm::mat4(1.0f), glm::vec3(0, 10, 0));
+	speederMT->M = glm::translate(glm::mat4(1.0f), glm::vec3(0, 50, 0));
 
 
 
@@ -243,9 +255,10 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 void Window::idle_callback()
 {
 	//update
-
-	testRot->M = glm::rotate(testRot->M, 0.1f, glm::vec3(0, 1, 0));
-	testObj->M = glm::translate(testObj->M, glm::vec3(0, 0, -0.1f));
+	speederMT->M = glm::translate(speederMT->M, glm::vec3(0, 0, -0.1f));
+	
+	//testRot->M = glm::rotate(testRot->M, 0.1f, glm::vec3(0, 1, 0));
+	//testObj->M = glm::translate(testObj->M, glm::vec3(0, 0, -0.1f));
 	world->update(glm::mat4(1.0f));
 }
 
@@ -358,6 +371,7 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		if (key == GLFW_KEY_K) {
 			audioEngine->setChannelVolume(0, 2.0f);
 		}
+		
 		if (key == GLFW_KEY_T) {
 			/*
 			//test 1 no
@@ -406,6 +420,11 @@ void Window::cursor_position_callback(GLFWwindow* window, double xpos, double yp
 	int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
 	if (state == GLFW_PRESS)
 	{
+		speederMT->M = glm::rotate(speederMT->M, ((float)(ypos - prevy)) / 180.0f * glm::pi<float>(), glm::vec3(1, 0, 0));
+		speederMT->M = glm::rotate(speederMT->M, ((float)(prevx - xpos)) / 180.0f * glm::pi<float>(), glm::vec3(0, 0, 1));
+
+
+		/*
 		float angle;
 		// Perform horizontal (y-axis) rotation
 		angle = (float)(prevx - xpos) / 100.0f;
@@ -418,6 +437,7 @@ void Window::cursor_position_callback(GLFWwindow* window, double xpos, double yp
 		cam_up = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, axis) * glm::vec4(cam_up, 1.0f));
 		// Now update the camera
 		V = glm::lookAt(cam_pos, cam_look_at, cam_up);
+		*/
 	}
 
 	prevx = xpos;
