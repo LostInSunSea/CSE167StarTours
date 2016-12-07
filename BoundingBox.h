@@ -49,7 +49,10 @@ private:
 	float minX;
 	float minY;
 	float minZ;
-
+	bool nonstatic=true;
+	float height;
+	float width;
+	float length;
 public:
 	BoundingBox();
 	~BoundingBox();
@@ -61,7 +64,11 @@ public:
 	bool aabbTest(BoundingBox * other);
 	void update(glm::mat4 trans);
 	void draw(glm::mat4, GLint shader);
+	void setNonStatic(bool position);
 	void init();
+	void setHeight(float heightz);
+	void setWidth(float widthz);
+	void setLength(float lengthz);
 	//variables
 	// These variables are needed for the shader program
 	GLuint VBO, VAO, EBO;

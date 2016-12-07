@@ -16,6 +16,7 @@
 #include <fstream>
 #include <string>
 #include "Component.h"
+#include <limits>
 
 class IntermediateBox:
 	public Component
@@ -59,15 +60,9 @@ private:
 		// Right face
 		{ 3, 2, 6, 6, 7, 3 }
 	};
-	float maxX;
-	float maxY;
-	float maxZ;
-	float minX;
-	float minY;
-	float minZ;
 	float height;
 	float width;
-
+	float length;
 public:
 	IntermediateBox();
 	~IntermediateBox();
@@ -76,6 +71,8 @@ public:
 	void init();
 	float getHeight();
 	float getWidth();
+	float getLength();
+	void processPoints();
 	//variables
 	// These variables are needed for the shader program
 	GLuint VBO, VAO, EBO;

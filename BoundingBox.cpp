@@ -112,7 +112,24 @@ void BoundingBox::draw(glm::mat4 trans, GLint shaderProgram)
 	GLint shaderProg = 3;
 	glUseProgram(shaderProg);
 	// Calculate the combination of the model and view (camera inverse) matrices
-	glm::mat4 modelview = Window::V * trans;
+	glm::mat4 modelview;
+	//nonstatic = true;
+	if (nonstatic) {
+		modelview = Window::V * trans;
+	}
+	else {
+		glm::mat4 temp = trans;
+		temp[0][0] = 1;
+		temp[0][1] = 0;
+		temp[0][2] = 0;
+		temp[1][0] = 0;
+		temp[1][1] = 1;
+		temp[1][2] = 0;
+		temp[2][0] = 0;
+		temp[2][1] = 0;
+		temp[2][2] = 1;
+		modelview=Window::V*temp*glm::scale(glm::mat4(1.0f), glm::vec3(width,height, length));
+	}
 	// We need to calcullate this because modern OpenGL does not keep track of any matrix other than the viewport (D)
 	// Consequently, we need to forward the projection, view, and model matrices to the shader programs
 	// Get the location of the uniform variables "projection" and "modelview"
@@ -129,6 +146,11 @@ void BoundingBox::draw(glm::mat4 trans, GLint shaderProgram)
 	glLineWidth(4);
 	glDrawArrays(GL_LINE_STRIP, 0, 12 * 3);
 	glBindVertexArray(0);
+}
+
+void BoundingBox::setNonStatic(bool position)
+{
+	nonstatic = position;
 }
 
 void BoundingBox::init()
@@ -169,4 +191,19 @@ void BoundingBox::init()
 	// Unbind the VAO now so we don't accidentally tamper with it.
 	// NOTE: You must NEVER unbind the element array buffer associated with a VAO!
 	glBindVertexArray(0);
+}
+
+void BoundingBox::setHeight(float heightz)
+{
+	height = heightz;
+}
+
+void BoundingBox::setWidth(float widthz)
+{
+	width = widthz;
+}
+
+void BoundingBox::setLength(float lengthz)
+{
+	length = lengthz;
 }

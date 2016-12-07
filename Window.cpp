@@ -136,17 +136,21 @@ void Window::initialize_objects()
 	speederBoxMT = new MatrixTransformation();
 	speederBoxInt = new IntermediateBox();
 	camera = new Camera();
+
 	testBox = new BoundingBox();
+	testBox->setNonStatic(false);
+
 	world->addChild(terrainMT);
-	terrainMT->addChild(terrain);
-	terrainMT->addChild(terrainBoxMT);
-	terrainBoxMT->addChild(terrainBox);
+	//terrainMT->addChild(terrain);
+	//terrainMT->addChild(terrainBoxMT);
+	//terrainBoxMT->addChild(terrainBox);
 
 	speederRot->M = glm::rotate(speederRot->M, 90.0f / 180.0f * glm::pi<float>(), glm::vec3(0, 1, 0));
 	speederRot->addChild(speederModel);
 	speederMT->addChild(speederRot);
 	speederMT->addChild(camera);
 	speederMT->addChild(speederBoxMT);
+	speederMT->addChild(testBox);
 	speederBoxMT->addChild(speederBoxInt);
 	world->addChild(speederMT);
 
@@ -294,7 +298,7 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 void Window::idle_callback()
 {
 	//update
-	speederMT->M = glm::translate(speederMT->M, glm::vec3(0, 0, -0.4f));
+	//speederMT->M = glm::translate(speederMT->M, glm::vec3(0, 0, -0.4f));
 
 	for (Node * n : laserWorld->allNodes)
 	{
@@ -306,8 +310,10 @@ void Window::idle_callback()
 	
 	//testRot->M = glm::rotate(testRot->M, 0.1f, glm::vec3(0, 1, 0));
 	//testObj->M = glm::translate(testObj->M, glm::vec3(0, 0, -0.1f));
+	testBox->setHeight(speederBoxInt->getHeight());
+	testBox->setWidth(speederBoxInt->getWidth());
+	testBox->setLength(speederBoxInt->getLength());
 	world->update(glm::mat4(1.0f));
-	testBox->update(testmat);
 	gun->spawn = false;
 }
 
@@ -341,8 +347,6 @@ void Window::display_callback(GLFWwindow* window)
 	skyboxObj->drawSkyBox();
 	//draw model shadow shader
 	world->draw(model, shadowShader);
-	//testBox->draw(testmat,shaderProgram);
-
 
 	laserWorld->draw(model, laserShader);
 

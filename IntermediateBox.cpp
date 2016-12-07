@@ -16,6 +16,7 @@ IntermediateBox::~IntermediateBox()
 void IntermediateBox::update(glm::mat4 trans)
 {
 	matrixTrans = trans;
+	processPoints();
 }
 
 void IntermediateBox::draw(glm::mat4 trans, GLint shader)
@@ -90,4 +91,47 @@ float IntermediateBox::getHeight()
 float IntermediateBox::getWidth()
 {
 	return width;
+}
+
+float IntermediateBox::getLength()
+{
+	return length;
+}
+
+void IntermediateBox::processPoints()
+{
+	float maxX = -1000000;
+	float maxY = -1000000;
+	float maxZ = -1000000;
+	float minX = 1000000;
+	float minY = 1000000;
+	float minZ = 1000000;
+
+	glm::mat4 neutered = matrixTrans;
+	for (int i = 0; i < 8; i++) {
+		glm::vec3 temp = glm::vec3(vertices[i][0], vertices[i][1], vertices[i][2]);
+		glm::vec4 mult = glm::vec4(temp, 1.0f);
+		mult = neutered * mult;
+		if (mult.x > maxX) {
+			maxX = mult.x;
+		}
+		else if (mult.x < minX) {
+			minX = mult.x;
+		}
+		if (mult.y > maxY) {
+			maxY = mult.y;
+		}
+		else if (mult.y < minY) {
+			minY = mult.y;
+		}
+		if (mult.z > maxZ) {
+			maxZ = mult.z;
+		}
+		else if (mult.y < minZ) {
+			minZ = mult.z;
+		}
+		width = maxX - minX;
+		height = maxY - minY;
+		length = maxZ - minZ;
+	}
 }
