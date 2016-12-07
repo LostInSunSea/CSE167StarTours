@@ -50,7 +50,7 @@ void Mesh::setupMesh()
 	glBindVertexArray(0);
 }
 
-void Mesh::Draw(GLint shader)
+void Mesh::draw(GLint shader)
 {
 	GLuint diffuseNr = 1;
 	GLuint specularNr = 1;

@@ -23,7 +23,7 @@ class Node
 public:
 	Node();
 	~Node();
-	virtual void update()=0;
+	virtual void update(glm::mat4 trans)=0;
 	virtual void draw(glm::mat4 trans, GLint shader)=0;
 };
 

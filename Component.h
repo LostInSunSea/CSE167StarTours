@@ -7,6 +7,6 @@ public:
 	Component();
 	~Component();
 	void draw(glm::mat4 trans, GLint shader);
-	void update();
+	void update(glm::mat4 trans);
 };
 

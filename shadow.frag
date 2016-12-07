@@ -22,6 +22,7 @@ uniform DirLight dirLight;
 
 uniform sampler2D texture_diffuse1;
 uniform sampler2D shadowMap;
+uniform int shadowMapSize;
 
 
 out vec4 color;
@@ -42,11 +43,14 @@ void main()
 
 	vec3 DiffuseColor = texture( texture_diffuse1, TexCoords ).rgb;
 
-	if(texture(shadowMap, ShadowCoords.xy).z < ShadowCoords.z - 0.01)
+    if(ShadowCoords.x > 1 || ShadowCoords.y > 1 || ShadowCoords.x < 0 ||  ShadowCoords.y < 0 )
+    {
+        visibility = 1.0;
+    }
+	else if(texture(shadowMap, ShadowCoords.xy).z < ShadowCoords.z - 0.01)
 	{
 		visibility = 0.5;
 	}
-
     color = vec4(visibility * DiffuseColor, 1) * vec4(light, 1);
 }
 

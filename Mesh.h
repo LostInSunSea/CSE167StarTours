@@ -46,6 +46,6 @@ public:
 	Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, std::vector<Texture> textures);
 	~Mesh();
 
-	void Draw(GLint shader);
+	void draw(GLint shader);
 };
 

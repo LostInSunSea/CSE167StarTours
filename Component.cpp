@@ -15,6 +15,6 @@ void Component::draw(glm::mat4 trans, GLint shader)
 {
 }
 
-void Component::update()
+void Component::update(glm::mat4 trans)
 {
 }

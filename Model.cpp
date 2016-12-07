@@ -2,6 +2,7 @@
 #include "Window.h"
 extern DirLight* sun;
 extern glm::vec3 cam_pos;
+extern glm::vec3 cam_look_at;
 extern GLuint depthTexture;
 extern GLuint DepthFrameBuffer;
 extern GLint depthShader;
@@ -189,21 +190,22 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 	return textures;
 }
 
-void Model::Draw(GLint shader)
+void Model::draw(GLint shader)
 {
 	for (GLuint i = 0; i < meshes.size(); i++)
 	{
-		meshes[i].Draw(shader);
+		meshes[i].draw(shader);
 	}
 }
 
-void Model::Draw(glm::mat4 model, GLint shader)
+void Model::draw(glm::mat4 model, GLint shader)
 {
 	glUseProgram(shader);
 	glm::vec3 lightInvDir = -(sun->dir);
 	//need to fine tune/gen automatically
-	glm::mat4 depthProjectionMatrix = glm::ortho<float>(-10, 10, -10, 10, -10, 20);
-	glm::mat4 depthViewMatrix = glm::lookAt(lightInvDir, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	//glm::mat4 depthProjectionMatrix = glm::ortho<float>(-30, 30, -30, 30, -30, 60);
+	glm::mat4 depthProjectionMatrix = glm::ortho<float>(-50, 50, -50, 50, -50, 100);
+	glm::mat4 depthViewMatrix = glm::lookAt(lightInvDir + cam_look_at, glm::vec3(0, 0, 0) + cam_look_at, glm::vec3(0, 1, 0));
 	//BASED OFF EACH OBJECT
 	glm::mat4 depthModelMatrix = model;
 	glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
@@ -213,7 +215,7 @@ void Model::Draw(glm::mat4 model, GLint shader)
 	{
 
 		glUniformMatrix4fv(glGetUniformLocation(shader, "depthMVP"), 1, GL_FALSE, &depthMVP[0][0]);
-		Draw(shader);
+		draw(shader);
 		return;
 	}
 
@@ -240,10 +242,11 @@ void Model::Draw(glm::mat4 model, GLint shader)
 		glUniform3f(glGetUniformLocation(shader, "dirLight.ambient"), sun->ambient.x, sun->ambient.y, sun->ambient.z);
 		glUniform3f(glGetUniformLocation(shader, "dirLight.diffuse"), sun->diffuse.x, sun->diffuse.y, sun->diffuse.z);
 		glUniform3f(glGetUniformLocation(shader, "dirLight.specular"), sun->specular.x, sun->specular.y, sun->specular.z);
+
 		glActiveTexture(GL_TEXTURE15);
 		glUniform1i(glGetUniformLocation(shader, "shadowMap"), 15);
 		glBindTexture(GL_TEXTURE_2D, depthTexture);
-		Draw(shader);
+		draw(shader);
 	}
 }
 

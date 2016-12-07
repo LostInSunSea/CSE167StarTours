@@ -24,7 +24,7 @@
 #include "Mesh.h"
 
 class Model:
-	Component
+	public Component
 {
 private:
 	std::vector<Mesh> meshes;
@@ -51,8 +51,8 @@ public:
 	Model(GLchar * path);
 	~Model();
 
-	void Draw(GLint shader);
-	void Draw(glm::mat4 trans, GLint shader);
+	void draw(GLint shader);
+	void draw(glm::mat4 trans, GLint shader);
 	glm::vec3 getMinVec();
 	glm::vec3 getMaxVec();
 };

@@ -17,6 +17,14 @@ GLint shadowShader;
 GLint skyboxShader;
 GLint quadShader;
 
+
+MatrixTransformation * world;
+MatrixTransformation * terrainMT;
+MatrixTransformation * testObj;
+MatrixTransformation * testRot;
+Camera * camera;
+
+Model * terrain;
 Model * testModel;
 AudioEngine * audioEngine=new AudioEngine();
 SkyBox * skyboxObj = new SkyBox();
@@ -49,6 +57,8 @@ GLuint quadVBO;
 #define QUAD_VERTEX_SHADER_PATH "../quad.vert"
 #define QUAD_FRAGMENT_SHADER_PATH "../quad.frag"
 
+#define SHADOW_MAP_RES 2048
+
 
 // Default camera parameters
 glm::vec3 cam_pos(0.0f, 10.0f, 20.0f);		// e  | Position of camera
@@ -64,6 +74,7 @@ glm::mat4 Window::V;
 dirLight_s Window::dirLight;
 pointLight_s Window::pointLight;
 spotlight_s Window::spotLight;
+
 
 
 int Window::manip = 0;
@@ -92,10 +103,33 @@ void Window::initialize_objects()
 	//testModel = new Model("../Assets/Models/snowspeeder2/snowSpeederv2.obj");
 	//testModel = new Model("../Assets/Models/scene/scene.obj");
 	testModel = new Model("../Assets/Models/snowspeeder2/snowSpeederv2.obj");
+	terrain = new Model("../Assets/Models/terrain/terrain.obj");
+
+	world = new MatrixTransformation();
+	testObj = new MatrixTransformation();
+	testRot = new MatrixTransformation();
+	terrainMT = new MatrixTransformation();
+	camera = new Camera();
+	world->addChild(testObj);
+	world->addChild(terrainMT);
+	terrainMT->addChild(terrain);
+	testObj->addChild(testRot);
+	testRot->addChild(testModel);
+	testObj->addChild(camera);
+
+	terrainMT->M = glm::scale(glm::mat4(1.0f), glm::vec3(5, 1, 5));
+	testObj->M = glm::translate(glm::mat4(1.0f), glm::vec3(0, 10, 0));
+
+
+
+
 	testBox = new BoundingBox();
 	testBox1 = new BoundingBox();
 
 	sun = new DirLight(glm::vec3(-3, -9, 0), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.9f, 0.9f, 0.9f), glm::vec3(0.3f, 0.3f, 0.3f));
+
+
+	
 
 	//set up depth texture
 	glGenFramebuffers(1, &DepthFrameBuffer);
@@ -103,7 +137,7 @@ void Window::initialize_objects()
 
 	glGenTextures(1, &depthTexture);
 	glBindTexture(GL_TEXTURE_2D, depthTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, SHADOW_MAP_RES, SHADOW_MAP_RES, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -209,17 +243,21 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 void Window::idle_callback()
 {
 	//update
+
+	testRot->M = glm::rotate(testRot->M, 0.1f, glm::vec3(0, 1, 0));
+	testObj->M = glm::translate(testObj->M, glm::vec3(0, 0, -0.1f));
+	world->update(glm::mat4(1.0f));
 }
 
 void Window::display_callback(GLFWwindow* window)
 {
 	
 	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Translate it down a bit so it's at the center of the scene
-	model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));	// It's a bit too big for our scene, so scale it down
+	//model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Translate it down a bit so it's at the center of the scene
+	//model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));	// It's a bit too big for our scene, so scale it down
 	//draw the buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, DepthFrameBuffer);
-	glViewport(0, 0, 1024, 1024);
+	glViewport(0, 0, SHADOW_MAP_RES, SHADOW_MAP_RES);
 
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK); // Cull back-facing triangles
@@ -228,7 +266,7 @@ void Window::display_callback(GLFWwindow* window)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//draw model depthshader
-	testModel->Draw(model, depthShader);
+	world->draw(model, depthShader);
 	
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -242,7 +280,8 @@ void Window::display_callback(GLFWwindow* window)
 	//draw the skybox
 	skyboxObj->drawSkyBox();
 	//draw model shadow shader
-	testModel->Draw(model, shadowShader);
+	//testModel->draw(model, shadowShader);
+	world->draw(model, shadowShader);
 	
 	/*
 	glm::mat4 trans = glm::mat4(1.0f);
