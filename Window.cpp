@@ -9,9 +9,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 const char* window_title = "Galaxy Battles: Episode V - The Imperium's Counter Attack";
-Cube * cube;
 GLint shaderProgram;
-GLint testShader;
 GLint depthShader;
 GLint shadowShader;
 GLint skyboxShader;
@@ -20,19 +18,18 @@ GLint quadShader;
 
 MatrixTransformation * world;
 MatrixTransformation * terrainMT;
-MatrixTransformation * testObj;
-MatrixTransformation * testRot;
 MatrixTransformation * speederMT;
 MatrixTransformation * speederRot;
 Camera * camera;
+MatrixTransformation * terrainBoxMT;
 
 Model * terrain;
+BoundingBox * terrainBox;
 Model * speederModel;
-Model * testModel;
+BoundingBox * speederBox;
+
 AudioEngine * audioEngine=new AudioEngine();
 SkyBox * skyboxObj = new SkyBox();
-BoundingBox * testBox;
-BoundingBox * testBox1;
 
 double Window::prevx;
 double Window::prevy;
@@ -90,53 +87,52 @@ void Window::initialize_objects()
 	audioEngine->init(cam_pos);
 	// Load the shader program. Make sure you have the correct filepath up top
 	shaderProgram = LoadShaders(VERTEX_SHADER_PATH, FRAGMENT_SHADER_PATH);
-	testShader = LoadShaders(TEST_VERTEX_SHADER, TEST_FRAGMENT_SHADER);
 	depthShader = LoadShaders(DEPTH_VERTEX_SHADER, DEPTH_FRAGMENT_SHADER);
 	shadowShader = LoadShaders(SHADOW_VERTEX_SHADER, SHADOW_FRAGMENT_SHADER);
 	skyboxShader = LoadShaders(SKYBOX_VERTEX_SHADER_PATH, SKYBOX_FRAGMENT_SHADER_PATH);
 	quadShader = LoadShaders(QUAD_VERTEX_SHADER_PATH, QUAD_FRAGMENT_SHADER_PATH);
 
+	cout << "shader program: " << shaderProgram << endl;
+	cout << "shader depth: " << depthShader << endl;
+	cout << "shader shadow: " << shadowShader << endl;
+	cout << "shader skybox: " << skyboxShader << endl;
+	cout << "shader quad: " << quadShader << endl;
+
+
 	skyboxObj->init();
 
-	//testModel = new Model("../Assets/Models/nanosuit/nanosuit.obj");
-	//testModel = new Model("../Assets/Models/snowspeeder/Star Wars Snowspeeder.obj");
-	//testModel = new Model("../Assets/Models/grass/grassCube.obj");
-	//testModel = new Model("../Assets/Models/scene/scene.obj");
-
-	testModel = new Model("../Assets/Models/snowspeeder2/snowSpeederv2.obj");
-	//testModel = new Model("../Assets/Models/scene/scene.obj");
 	speederModel = new Model("../Assets/Models/snowspeeder2/snowSpeederv2.obj");
 	terrain = new Model("../Assets/Models/terrain/terrain.obj");
+	terrainBox = new BoundingBox();
 
 	world = new MatrixTransformation();
-	testObj = new MatrixTransformation();
-	testRot = new MatrixTransformation();
 	terrainMT = new MatrixTransformation();
 	speederMT = new MatrixTransformation();
 	speederRot = new MatrixTransformation();
+	terrainBoxMT = new MatrixTransformation();
 	camera = new Camera();
 	world->addChild(terrainMT);
 	terrainMT->addChild(terrain);
+	terrainMT->addChild(terrainBoxMT);
+	terrainBoxMT->addChild(terrainBox);
 
 	speederRot->M = glm::rotate(speederRot->M, 90.0f / 180.0f * glm::pi<float>(), glm::vec3(0, 1, 0));
 	speederRot->addChild(speederModel);
-	
 	speederMT->addChild(speederRot);
 	speederMT->addChild(camera);
 	world->addChild(speederMT);
 
-	//testObj->addChild(testRot);
-	//testRot->addChild(testModel);
-	//testObj->addChild(camera);
-
+	//properly create the transformation matrix for the box
+	glm::mat4 trans = glm::mat4(1.0f);
+	glm::vec3 minVec = terrain->getMinVec();
+	glm::vec3 maxVec = terrain->getMaxVec();
+	glm::vec3 scaleVec = maxVec - minVec;
+	terrainBoxMT->M = glm::scale(trans, scaleVec);
 	terrainMT->M = glm::scale(glm::mat4(1.0f), glm::vec3(5, 1, 5));
 	speederMT->M = glm::translate(glm::mat4(1.0f), glm::vec3(0, 50, 0));
 
 
 
-
-	testBox = new BoundingBox();
-	testBox1 = new BoundingBox();
 
 	sun = new DirLight(glm::vec3(-3, -9, 0), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.9f, 0.9f, 0.9f), glm::vec3(0.3f, 0.3f, 0.3f));
 
@@ -255,10 +251,8 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 void Window::idle_callback()
 {
 	//update
-	speederMT->M = glm::translate(speederMT->M, glm::vec3(0, 0, -0.1f));
-	
-	//testRot->M = glm::rotate(testRot->M, 0.1f, glm::vec3(0, 1, 0));
-	//testObj->M = glm::translate(testObj->M, glm::vec3(0, 0, -0.1f));
+	speederMT->M = glm::translate(speederMT->M, glm::vec3(0, 0, -0.4f));
+
 	world->update(glm::mat4(1.0f));
 }
 
@@ -266,8 +260,6 @@ void Window::display_callback(GLFWwindow* window)
 {
 	
 	glm::mat4 model = glm::mat4(1.0f);
-	//model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Translate it down a bit so it's at the center of the scene
-	//model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));	// It's a bit too big for our scene, so scale it down
 	//draw the buffer
 	glBindFramebuffer(GL_FRAMEBUFFER, DepthFrameBuffer);
 	glViewport(0, 0, SHADOW_MAP_RES, SHADOW_MAP_RES);
@@ -293,35 +285,8 @@ void Window::display_callback(GLFWwindow* window)
 	//draw the skybox
 	skyboxObj->drawSkyBox();
 	//draw model shadow shader
-	//testModel->draw(model, shadowShader);
 	world->draw(model, shadowShader);
 	
-	/*
-	glm::mat4 trans = glm::mat4(1.0f);
-	trans = glm::translate(model, glm::vec3(-1.0f, -1.0f, -1.0f)); // Translate it down a bit so it's at the center of the scene
-	trans = glm::scale(model, glm::vec3(4.0f, 4.0f, 4.0f));	// It's a bit too big for our scene, so scale it down
-															//Draw depth buffer
-	testBox->draw(trans,shaderProgram);
-	*/
-	//setup box size
-	glm::mat4 trans = glm::mat4(1.0f);
-	glm::vec3 minVec = testModel->getMinVec();
-	glm::vec3 maxVec = testModel->getMaxVec();
-	glm::vec3 scaleVec = maxVec - minVec;
-	trans = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Translate it down a bit so it's at the center of the scene
-	trans = glm::scale(trans, scaleVec);	// It's a bit too big for our scene, so scale it down
-	testBox->draw(trans, shaderProgram);
-	//draw second box
-	glm::mat4 trans1 = glm::mat4(1.0f);
-	trans1 = glm::translate(model, glm::vec3(4.0f, 4.0f, 4.0f));
-	trans1 = glm::scale(trans1, scaleVec);	// It's a bit too big for our scene, so scale it down
-	testBox1->draw(trans1, shaderProgram);
-
-
-
-
-	// display quad
-
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, 256, 256);
@@ -373,29 +338,6 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		}
 		
 		if (key == GLFW_KEY_T) {
-			/*
-			//test 1 no
-			testBox->setMinExtents(glm::vec3(0.0f, 0.0f, 0.0f));
-			testBox->setMaxExtents(glm::vec3(1.0f, 1.0f, 1.0f));
-			testBox1->setMinExtents(glm::vec3(1.0f, 1.0f, 1.0f));
-			testBox1->setMaxExtents(glm::vec3(2.0f, 2.0f, 2.0f));
-			testBox->aabbTest(testBox1);
-			//test 2 no
-			testBox->setMinExtents(glm::vec3(0.0f, 0.0f, 0.0f));
-			testBox->setMaxExtents(glm::vec3(1.0f, 1.0f, 1.0f));
-			testBox1->setMinExtents(glm::vec3(1.0f, 0.0f, 0.0f));
-			testBox1->setMaxExtents(glm::vec3(2.0f, 1.0f, 1.0f));
-			testBox->aabbTest(testBox1);
-
-			//test 3 yes
-			testBox->setMinExtents(glm::vec3(0.0f, 0.0f, 0.0f));
-			testBox->setMaxExtents(glm::vec3(1.0f, 1.0f, 1.0f));
-			testBox1->setMinExtents(glm::vec3(0.0f, 0.5f, 0.0f));
-			testBox1->setMaxExtents(glm::vec3(1.0f, 1.5f, 1.0f));
-			testBox->aabbTest(testBox1);
-			*/
-			testBox->aabbTest(testBox1);
-
 		}
 	}
 }
@@ -422,22 +364,6 @@ void Window::cursor_position_callback(GLFWwindow* window, double xpos, double yp
 	{
 		speederMT->M = glm::rotate(speederMT->M, ((float)(ypos - prevy)) / 180.0f * glm::pi<float>(), glm::vec3(1, 0, 0));
 		speederMT->M = glm::rotate(speederMT->M, ((float)(prevx - xpos)) / 180.0f * glm::pi<float>(), glm::vec3(0, 0, 1));
-
-
-		/*
-		float angle;
-		// Perform horizontal (y-axis) rotation
-		angle = (float)(prevx - xpos) / 100.0f;
-		cam_pos = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(cam_pos, 1.0f));
-		cam_up = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(cam_up, 1.0f));
-		//Now rotate vertically based on current orientation
-		angle = (float)(ypos - prevy) / 100.0f;
-		glm::vec3 axis = glm::cross((cam_pos - cam_look_at), cam_up);
-		cam_pos = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, axis) * glm::vec4(cam_pos, 1.0f));
-		cam_up = glm::vec3(glm::rotate(glm::mat4(1.0f), angle, axis) * glm::vec4(cam_up, 1.0f));
-		// Now update the camera
-		V = glm::lookAt(cam_pos, cam_look_at, cam_up);
-		*/
 	}
 
 	prevx = xpos;
