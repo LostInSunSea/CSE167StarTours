@@ -1,113 +1,24 @@
-#include "BoundingBox.h"
+#include "IntermediateBox.h"
 #include <algorithm>    // std::max
 #include "Window.h"
-using namespace std;
 
-BoundingBox::BoundingBox()
+IntermediateBox::IntermediateBox()
 {
 	init();
 }
 
 
-BoundingBox::~BoundingBox()
+IntermediateBox::~IntermediateBox()
 {
-	// Delete previously generated buffers. Note that forgetting to do this can waste GPU memory in a 
-	// large project! This could crash the graphics driver due to memory leaks, or slow down application performance!
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &EBO);
+
 }
 
-glm::vec3 BoundingBox::getMaxExtents()
+void IntermediateBox::update(glm::mat4 trans)
 {
-	return maxExtents;
+	matrixTrans = trans;
 }
 
-glm::vec3 BoundingBox::getMinExtents()
-{
-	return minExtents;
-}
-
-glm::mat4 BoundingBox::getTransMatrix()
-{
-	return matrixTrans;
-}
-
-void BoundingBox::setMaxExtents(glm::vec3 max)
-{
-	maxExtents = max;
-}
-
-void BoundingBox::setMinExtents(glm::vec3 min)
-{
-	minExtents = min;
-}
-
-bool BoundingBox::aabbTest(BoundingBox* other)
-{
-	glm::vec4 thisMinExtents = matrixTrans * glm::vec4(minExtents,1.0f);
-	glm::vec4 thisMaxExtents = matrixTrans * glm::vec4(maxExtents, 1.0f);
-	glm::vec4 othrMinExtents = other->getTransMatrix() * glm::vec4(other->getMinExtents(), 1.0f);
-	glm::vec4 othrMaxExtents = other->getTransMatrix() * glm::vec4(other->getMaxExtents(), 1.0f);
-
-	glm::vec3 distance1 = glm::vec3(othrMinExtents - thisMaxExtents);
-	glm::vec3 distance2 = glm::vec3(thisMinExtents - othrMaxExtents);
-	glm::vec3 distance = glm::max(distance1, distance2);
-	
-	if (other->getTransMatrix() == matrixTrans) {
-		cout << "hello world";
-	}
-
-	cout << "-----------------------------------" << endl;
-	cout << "distance 1: "<< endl;
-	cout << "x: " << distance1.x << endl;
-	cout << "y: " << distance1.y << endl;
-	cout << "z: " << distance1.z << endl;
-	cout << "distance 2: " << endl;
-	cout << "x: " << distance2.x << endl;
-	cout << "y: " << distance2.y << endl;
-	cout << "z: " << distance2.z << endl;
-
-	cout << "this min: " << endl;
-	cout << "x: " << thisMinExtents.x << endl;
-	cout << "y: " << thisMinExtents.y << endl;
-	cout << "z: " << thisMinExtents.z << endl;
-	cout << "this max: " << endl;
-	cout << "x: " << thisMaxExtents.x << endl;
-	cout << "y: " << thisMaxExtents.y << endl;
-	cout << "z: " << thisMaxExtents.z << endl;
-	cout << "othr min: " << endl;
-	cout << "x: " << othrMinExtents.x << endl;
-	cout << "y: " << othrMinExtents.y << endl;
-	cout << "z: " << othrMinExtents.z << endl;
-	cout << "othr max: " << endl;
-	cout << "x: " << othrMaxExtents.x << endl;
-	cout << "y: " << othrMaxExtents.y << endl;
-	cout << "z: " << othrMaxExtents.z << endl;
-
-	float maxDistance;
-	float temp = max(distance.x, distance.y);
-	maxDistance = max(temp, distance.z);
-	cout << "distance:" << maxDistance << endl;
-	if (maxDistance < 0) {
-		cout << "intersect: 1" << endl;
-		cout << "-----------------------------------"<<endl;
-		return true;
-	}
-	else {
-		cout << "intersect: 0" << endl;
-		cout << "-----------------------------------" << endl;
-
-		return false;
-	}
-}
-
-void BoundingBox::update(glm::mat4 trans)
-{
-	matrixTrans=trans;
-}
-
-void BoundingBox::draw(glm::mat4 trans, GLint shaderProgram)
+void IntermediateBox::draw(glm::mat4 trans, GLint shader)
 {
 	GLint shaderProg = 3;
 	glUseProgram(shaderProg);
@@ -131,7 +42,7 @@ void BoundingBox::draw(glm::mat4 trans, GLint shaderProgram)
 	glBindVertexArray(0);
 }
 
-void BoundingBox::init()
+void IntermediateBox::init()
 {
 	toWorld = glm::mat4(1.0f);
 
@@ -169,4 +80,14 @@ void BoundingBox::init()
 	// Unbind the VAO now so we don't accidentally tamper with it.
 	// NOTE: You must NEVER unbind the element array buffer associated with a VAO!
 	glBindVertexArray(0);
+}
+
+float IntermediateBox::getHeight()
+{
+	return height;
+}
+
+float IntermediateBox::getWidth()
+{
+	return width;
 }

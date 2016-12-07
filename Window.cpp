@@ -7,6 +7,7 @@
 #include "Model.h"
 #include "Camera.h"
 #include "Spawner.h"
+#include "IntermediateBox.h"
 #include <glm/gtc/type_ptr.hpp>
 
 const char* window_title = "Galaxy Battles: Episode V - The Imperium's Counter Attack";
@@ -29,12 +30,17 @@ MatrixTransformation * gunMTR;
 Spawner * gun;
 Camera * camera;
 MatrixTransformation * terrainBoxMT;
+MatrixTransformation * speederBoxMT;
 
 Model * laser;
 Model * terrain;
 BoundingBox * terrainBox;
 Model * speederModel;
 BoundingBox * speederBox;
+IntermediateBox * speederBoxInt;
+BoundingBox * testBox;
+glm::mat4 testmat = glm::mat4(1);
+glm::vec3 testVec = glm::vec3(0);
 
 AudioEngine * audioEngine=new AudioEngine();
 SkyBox * skyboxObj = new SkyBox();
@@ -127,7 +133,10 @@ void Window::initialize_objects()
 	gunMTR = new MatrixTransformation();
 	gun = new Spawner(laserMT);
 	terrainBoxMT = new MatrixTransformation();
+	speederBoxMT = new MatrixTransformation();
+	speederBoxInt = new IntermediateBox();
 	camera = new Camera();
+	testBox = new BoundingBox();
 	world->addChild(terrainMT);
 	terrainMT->addChild(terrain);
 	terrainMT->addChild(terrainBoxMT);
@@ -137,7 +146,16 @@ void Window::initialize_objects()
 	speederRot->addChild(speederModel);
 	speederMT->addChild(speederRot);
 	speederMT->addChild(camera);
+	speederMT->addChild(speederBoxMT);
+	speederBoxMT->addChild(speederBoxInt);
 	world->addChild(speederMT);
+
+	//properly make transformation for speeder
+	glm::mat4 trans2 = glm::mat4(1.0f);
+	glm::vec3 minVec2 = speederModel->getMinVec();
+	glm::vec3 maxVec2 = speederModel->getMaxVec();
+	glm::vec3 scaleVec2 = maxVec2 - minVec2;
+	speederBoxMT->M = glm::scale(trans2, scaleVec2);
 
 	//properly create the transformation matrix for the box
 	glm::mat4 trans = glm::mat4(1.0f);
@@ -289,6 +307,7 @@ void Window::idle_callback()
 	//testRot->M = glm::rotate(testRot->M, 0.1f, glm::vec3(0, 1, 0));
 	//testObj->M = glm::translate(testObj->M, glm::vec3(0, 0, -0.1f));
 	world->update(glm::mat4(1.0f));
+	testBox->update(testmat);
 	gun->spawn = false;
 }
 
@@ -322,7 +341,7 @@ void Window::display_callback(GLFWwindow* window)
 	skyboxObj->drawSkyBox();
 	//draw model shadow shader
 	world->draw(model, shadowShader);
-	
+	//testBox->draw(testmat,shaderProgram);
 
 
 	laserWorld->draw(model, laserShader);
@@ -380,6 +399,19 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		}
 		
 		if (key == GLFW_KEY_T) {
+			terrainBox->aabbTest(testBox);
+		}
+		if (key == GLFW_KEY_UP) {
+			testmat = glm::translate(testmat, glm::vec3(0.0f, 4.0f, 0.0f));
+		}
+		if (key == GLFW_KEY_DOWN) {
+			testmat = glm::translate(testmat, glm::vec3(0.0f, -4.0f, 0.0f));
+		}
+		if (key == GLFW_KEY_LEFT) {
+			testmat = glm::translate(testmat, glm::vec3(4.0f, 0.0f, 0.0f));
+		}		
+		if (key == GLFW_KEY_RIGHT) {
+			testmat = glm::translate(testmat, glm::vec3(-4.0f, 0.0f, 0.0f));
 		}
 	}
 }
