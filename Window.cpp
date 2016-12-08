@@ -31,9 +31,16 @@ Spawner * gun;
 Camera * camera;
 MatrixTransformation * terrainBoxMT;
 MatrixTransformation * speederBoxMT;
+MatrixTransformation * atatMT;
+MatrixTransformation * turretMT;
+MatrixTransformation * turretHeadMT;
+MatrixTransformation * turretBaseMT;
 
+Model * atat;
 Model * laser;
 Model * terrain;
+Model * turretHead;
+Model * turretBase;
 BoundingBox * terrainBox;
 Model * speederModel;
 BoundingBox * speederBox;
@@ -73,7 +80,7 @@ GLuint quadVBO;
 #define LASER_VERTEX_SHADER_PATH "../laser.vert"
 #define LASER_FRAGMENT_SHADER_PATH "../laser.frag"
 
-#define SHADOW_MAP_RES 2048
+#define SHADOW_MAP_RES 4096
 
 
 // Default camera parameters
@@ -102,6 +109,8 @@ int Window::manip = 0;
 int Window::light = 1;
 bool Window::normal = false;
 
+int shadowStyle = 1;
+
 void Window::initialize_objects()
 {
 
@@ -126,6 +135,10 @@ void Window::initialize_objects()
 	speederModel = new Model("../Assets/Models/snowspeeder2/snowSpeederv2.obj");
 	terrain = new Model("../Assets/Models/terrain/terrain2.obj");
 	laser = new Model("../Assets/Models/laser/laser.obj");
+	atat = new Model("../Assets/Models/atat/atat.obj");
+	turretBase = new Model("../Assets/Models/turret/turretBase.obj");
+	turretHead = new Model("../Assets/Models/turret/turretHead.obj");
+
 	terrainBox = new BoundingBox();
 
 	world = new MatrixTransformation();
@@ -140,11 +153,16 @@ void Window::initialize_objects()
 	terrainBoxMT = new MatrixTransformation();
 	speederBoxMT = new MatrixTransformation();
 	speederBoxInt = new IntermediateBox();
+	atatMT = new MatrixTransformation();
+	turretMT = new MatrixTransformation();
+	turretHeadMT = new MatrixTransformation();
+	turretBaseMT = new MatrixTransformation();
 	camera = new Camera();
 
 	testBox = new BoundingBox();
 	testBox->setNonStatic(false);
 
+	
 	world->addChild(terrainMT);
 	terrainMT->addChild(terrain);
 	terrainMT->addChild(terrainBoxMT);
@@ -185,8 +203,21 @@ void Window::initialize_objects()
 	speederMT->addChild(gunMTL);
 	speederMT->addChild(gunMTR);
 
+	atatMT->M = glm::scale(atatMT->M, glm::vec3(20, 20, 20));
+	atatMT->addChild(atat);
+	world->addChild(atatMT);
 
-	sun = new DirLight(glm::vec3(-3, -9, 0), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.9f, 0.9f, 0.9f), glm::vec3(0.3f, 0.3f, 0.3f));
+	turretBaseMT->addChild(turretBase);
+	turretHeadMT->addChild(turretHead);
+	turretMT->addChild(turretBaseMT);
+	turretMT->addChild(turretHeadMT);
+	turretMT->M = glm::translate(turretMT->M, glm::vec3(0, 20, 0));
+	turretMT->M = glm::scale(turretMT->M, glm::vec3(5, 5, 5));
+	
+	world->addChild(turretMT);
+
+
+	sun = new DirLight(glm::vec3(-3, -3, -3), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.9f, 0.9f, 0.9f), glm::vec3(0.3f, 0.3f, 0.3f));
 
 
 	
@@ -295,7 +326,7 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 
 	if (height > 0)
 	{
-		P = glm::perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
+		P = glm::perspective(45.0f, (float)width / (float)height, 0.1f, 10000.0f);
 		V = glm::lookAt(cam_pos, cam_look_at, cam_up);
 	}
 }
@@ -419,11 +450,20 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		if (key == GLFW_KEY_S) {
 			speed -= 0.1f;
 		}
+		if (key == GLFW_KEY_SPACE) {
+			speed = 0;
+		}
 		if (key == GLFW_KEY_A) {
 			speederMT->M = glm::rotate(speederMT->M, (float)(1) / 180.0f * glm::pi<float>(), glm::vec3(0, 1, 0));
 		}
 		if (key == GLFW_KEY_D) {
 			speederMT->M = glm::rotate(speederMT->M, (float)(-1) / 180.0f * glm::pi<float>(), glm::vec3(0, 1, 0));
+		}
+		if (key == GLFW_KEY_1) {
+			shadowStyle = 1;
+		}
+		if (key == GLFW_KEY_2) {
+			shadowStyle = 2;
 		}
 	}
 	if (action == GLFW_REPEAT)
