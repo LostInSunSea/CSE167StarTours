@@ -30,7 +30,6 @@ void MatrixTransformation::update(glm::mat4 C)
 		n->update(C * M);
 		if (n->toDelete == true)
 		{
-			std::cerr << "deleted" << std::endl;
 			removeChild(n);
 			delete n;
 		}
@@ -42,7 +41,6 @@ void MatrixTransformation::update(glm::mat4 C)
 		prevTime = std::clock();
 		if (ttl <= 0)
 		{
-			std::cerr << "delet this" << std::endl;
 			toDelete = true;
 		}
 	}

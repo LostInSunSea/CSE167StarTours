@@ -70,20 +70,21 @@ void main()
 	vec3 DiffuseColor = texture( texture_diffuse1, TexCoords ).rgb;
     
 
-    if(style == 1)
+    if(style == 2)
     {
-        for(int i = 0; i < 4; i++)
+
+       for(int i = 0; i < 4; i++)
         {
             int index = int(16.0*random(gl_FragCoord.xyy, i))%16;
             visibility -= 0.15*(1-texture(shadowMap, vec3(ShadowCoords.xy + poissonDisk[index]/700.0, (ShadowCoords.z-bias)/ShadowCoords.w).xy).z);
 
-            
-        }
+        } 
+        
 
     }
-    else if (style == 2)
+    else if (style == 1)
     {
-            if(ShadowCoords.x > 1 || ShadowCoords.y > 1 || ShadowCoords.x < 0 ||  ShadowCoords.y < 0 || ShadowCoords.z > 1 ||  ShadowCoords.z < 0)
+        if(ShadowCoords.x > 1 || ShadowCoords.y > 1 || ShadowCoords.x < 0 ||  ShadowCoords.y < 0 || ShadowCoords.z > 1 ||  ShadowCoords.z < 0)
         {
             visibility = 1.0;
         }

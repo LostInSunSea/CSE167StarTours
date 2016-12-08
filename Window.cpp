@@ -80,7 +80,7 @@ GLuint quadVBO;
 #define LASER_VERTEX_SHADER_PATH "../laser.vert"
 #define LASER_FRAGMENT_SHADER_PATH "../laser.frag"
 
-#define SHADOW_MAP_RES 4096
+#define SHADOW_MAP_RES 8192
 
 
 // Default camera parameters
@@ -133,7 +133,7 @@ void Window::initialize_objects()
 	skyboxObj->init();
 
 	speederModel = new Model("../Assets/Models/snowspeeder2/snowSpeederv2.obj");
-	terrain = new Model("../Assets/Models/terrain/terrain2.obj");
+	terrain = new Model("../Assets/Models/terrain/terrain3.obj");
 	laser = new Model("../Assets/Models/laser/laser.obj");
 	atat = new Model("../Assets/Models/atat/atat.obj");
 	turretBase = new Model("../Assets/Models/turret/turretBase.obj");
@@ -217,7 +217,7 @@ void Window::initialize_objects()
 	world->addChild(turretMT);
 
 
-	sun = new DirLight(glm::vec3(-3, -3, -3), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.9f, 0.9f, 0.9f), glm::vec3(0.3f, 0.3f, 0.3f));
+	sun = new DirLight(glm::vec3(-3, -3, -3), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.3f, 0.3f, 0.3f));
 
 
 	
