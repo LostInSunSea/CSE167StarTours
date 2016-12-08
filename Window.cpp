@@ -17,6 +17,8 @@ GLint shadowShader;
 GLint skyboxShader;
 GLint quadShader;
 GLint laserShader;
+vector<BoundingBox *> listOfBoundingBoxes;
+
 
 
 MatrixTransformation * world;
@@ -216,7 +218,7 @@ void Window::initialize_objects()
 	
 	world->addChild(turretMT);
 
-
+	listOfBoundingBoxes.push_back(terrainBox);
 	sun = new DirLight(glm::vec3(-3, -3, -3), glm::vec3(0.1f, 0.1f, 0.1f), glm::vec3(0.9f, 0.9f, 0.9f), glm::vec3(0.3f, 0.3f, 0.3f));
 
 
@@ -351,6 +353,7 @@ void Window::idle_callback()
 	testBox->setLength(speederBoxInt->getLength());
 	world->update(glm::mat4(1.0f));
 	laserWorld->update(glm::mat4(1.0f));
+	checkAllBoundingBoxes();
 	gun->spawn = false;
 }
 
@@ -533,6 +536,20 @@ void Window::cursor_position_callback(GLFWwindow* window, double xpos, double yp
 
 	prevx = xpos;
 	prevy = ypos;
+}
+
+void Window::checkAllBoundingBoxes()
+{
+	for (int i = 0; i < listOfBoundingBoxes.size(); i++) {
+		if (testBox->aabbTest(listOfBoundingBoxes[i])) {
+			testBox->setColor(3);
+			listOfBoundingBoxes[i]->setColor(3);
+		}
+		else {
+			testBox->setColor(2);
+			listOfBoundingBoxes[i]->setColor(2);
+		}
+	}
 }
 
 /*
