@@ -38,6 +38,7 @@ MatrixTransformation * turretMT;
 MatrixTransformation * turretHeadMT;
 MatrixTransformation * turretBaseMT;
 
+
 Model * atat;
 Model * laser;
 Model * terrain;
@@ -48,6 +49,8 @@ Model * speederModel;
 BoundingBox * speederBox;
 IntermediateBox * speederBoxInt;
 BoundingBox * testBox;
+BoundingBox * atatBox;
+MatrixTransformation * atatBoxMT;
 glm::mat4 testmat = glm::mat4(1);
 glm::vec3 testVec = glm::vec3(0);
 bool drawBoundingBoxes=true;
@@ -170,6 +173,9 @@ void Window::initialize_objects()
 	turretHeadMT = new MatrixTransformation();
 	turretBaseMT = new MatrixTransformation();
 	camera = new Camera();
+	atatBox = new BoundingBox();
+	atatBoxMT = new MatrixTransformation();
+
 
 	testBox = new BoundingBox();
 	testBox->setNonStatic(false);
@@ -218,7 +224,17 @@ void Window::initialize_objects()
 	atatMT->M = glm::scale(atatMT->M, glm::vec3(10, 10, 10));
 	atatMT->M = glm::translate(atatMT->M, glm::vec3(0, -0.1, 0));
 	atatMT->addChild(atat);
+	atatMT->addChild(atatBoxMT);
+	atatBoxMT->addChild(atatBox);
 	world->addChild(atatMT);
+
+	//properly make transformation for speeder
+	glm::mat4 trans3 = glm::mat4(1.0f);
+	glm::vec3 minVec3 = atat->getMinVec();
+	glm::vec3 maxVec3 = atat->getMaxVec();
+	glm::vec3 scaleVec3 = maxVec3 - minVec3;
+	trans3 = glm::translate(trans3, glm::vec3(0.0f,4.0f,0.0f));
+	atatBoxMT->M = glm::scale(trans3, scaleVec3);
 
 	turretBaseMT->addChild(turretBase);
 	turretHeadMT->addChild(turretHead);
@@ -231,6 +247,7 @@ void Window::initialize_objects()
 	world->addChild(turretMT);
 
 	listOfBoundingBoxes.push_back(terrainBox);
+	listOfBoundingBoxes.push_back(atatBox);
 	sun = new DirLight(glm::vec3(-3, -3, -3), glm::vec3(0.3f, 0.3f, 0.3f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.3f, 0.3f, 0.3f));
 
 
@@ -562,17 +579,22 @@ void Window::cursor_position_callback(GLFWwindow* window, double xpos, double yp
 
 void Window::checkAllBoundingBoxes()
 {
+	bool noCol = false;
 	for (int i = 0; i < listOfBoundingBoxes.size(); i++) {
 		if (testBox->aabbTest(listOfBoundingBoxes[i])) {
+			noCol = true;
 			testBox->setColor(3);
 			listOfBoundingBoxes[i]->setColor(3);
 			audioEngine->playSound("../Assets/Sound/Ambient/R2D2/Death.mp3", glm::vec3(1), glm::vec3(1),3.0f);
 		}
 		else {
-			testBox->setColor(2);
 			listOfBoundingBoxes[i]->setColor(2);
 		}
 	}
+	if (!noCol) {
+		testBox->setColor(2);
+	}
+
 }
 
 /*
