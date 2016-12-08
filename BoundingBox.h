@@ -53,6 +53,8 @@ private:
 	float height;
 	float width;
 	float length;
+	int color=2;
+	bool draws=true;
 public:
 	BoundingBox();
 	~BoundingBox();
@@ -69,8 +71,10 @@ public:
 	void setHeight(float heightz);
 	void setWidth(float widthz);
 	void setLength(float lengthz);
+	void setColor(int colorz);
+	void setDraw(bool drawz);
 	//variables
-	// These variables are needed for the shader program
+	//These variables are needed for the shader program
 	GLuint VBO, VAO, EBO;
 	GLuint uProjection, uModelview;
 	glm::mat4 toWorld;
