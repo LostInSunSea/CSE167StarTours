@@ -26,6 +26,7 @@
     <ClInclude Include="..\Cube.h" />
     <ClInclude Include="..\DirLight.h" />
     <ClInclude Include="..\Group.h" />
+    <ClInclude Include="..\IntermediateBox.h" />
     <ClInclude Include="..\main.h" />
     <ClInclude Include="..\MatrixTransformation.h" />
     <ClInclude Include="..\Mesh.h" />
@@ -46,6 +47,7 @@
     <ClCompile Include="..\Cube.cpp" />
     <ClCompile Include="..\DirLight.cpp" />
     <ClCompile Include="..\Group.cpp" />
+    <ClCompile Include="..\IntermediateBox.cpp" />
     <ClCompile Include="..\main.cpp" />
     <ClCompile Include="..\MatrixTransformation.cpp" />
     <ClCompile Include="..\Mesh.cpp" />

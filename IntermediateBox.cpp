@@ -1,135 +1,30 @@
-#include "BoundingBox.h"
+#include "IntermediateBox.h"
 #include <algorithm>    // std::max
 #include "Window.h"
-using namespace std;
 
-BoundingBox::BoundingBox()
+IntermediateBox::IntermediateBox()
 {
 	init();
 }
 
 
-BoundingBox::~BoundingBox()
+IntermediateBox::~IntermediateBox()
 {
-	// Delete previously generated buffers. Note that forgetting to do this can waste GPU memory in a 
-	// large project! This could crash the graphics driver due to memory leaks, or slow down application performance!
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &EBO);
+
 }
 
-glm::vec3 BoundingBox::getMaxExtents()
+void IntermediateBox::update(glm::mat4 trans)
 {
-	return maxExtents;
+	matrixTrans = trans;
+	processPoints();
 }
 
-glm::vec3 BoundingBox::getMinExtents()
-{
-	return minExtents;
-}
-
-glm::mat4 BoundingBox::getTransMatrix()
-{
-	return matrixTrans;
-}
-
-void BoundingBox::setMaxExtents(glm::vec3 max)
-{
-	maxExtents = max;
-}
-
-void BoundingBox::setMinExtents(glm::vec3 min)
-{
-	minExtents = min;
-}
-
-bool BoundingBox::aabbTest(BoundingBox* other)
-{
-	glm::vec4 thisMinExtents = matrixTrans * glm::vec4(minExtents,1.0f);
-	glm::vec4 thisMaxExtents = matrixTrans * glm::vec4(maxExtents, 1.0f);
-	glm::vec4 othrMinExtents = other->getTransMatrix() * glm::vec4(other->getMinExtents(), 1.0f);
-	glm::vec4 othrMaxExtents = other->getTransMatrix() * glm::vec4(other->getMaxExtents(), 1.0f);
-
-	glm::vec3 distance1 = glm::vec3(othrMinExtents - thisMaxExtents);
-	glm::vec3 distance2 = glm::vec3(thisMinExtents - othrMaxExtents);
-	glm::vec3 distance = glm::max(distance1, distance2);
-	
-	if (other->getTransMatrix() == matrixTrans) {
-		cout << "hello world";
-	}
-
-	cout << "-----------------------------------" << endl;
-	cout << "distance 1: "<< endl;
-	cout << "x: " << distance1.x << endl;
-	cout << "y: " << distance1.y << endl;
-	cout << "z: " << distance1.z << endl;
-	cout << "distance 2: " << endl;
-	cout << "x: " << distance2.x << endl;
-	cout << "y: " << distance2.y << endl;
-	cout << "z: " << distance2.z << endl;
-
-	cout << "this min: " << endl;
-	cout << "x: " << thisMinExtents.x << endl;
-	cout << "y: " << thisMinExtents.y << endl;
-	cout << "z: " << thisMinExtents.z << endl;
-	cout << "this max: " << endl;
-	cout << "x: " << thisMaxExtents.x << endl;
-	cout << "y: " << thisMaxExtents.y << endl;
-	cout << "z: " << thisMaxExtents.z << endl;
-	cout << "othr min: " << endl;
-	cout << "x: " << othrMinExtents.x << endl;
-	cout << "y: " << othrMinExtents.y << endl;
-	cout << "z: " << othrMinExtents.z << endl;
-	cout << "othr max: " << endl;
-	cout << "x: " << othrMaxExtents.x << endl;
-	cout << "y: " << othrMaxExtents.y << endl;
-	cout << "z: " << othrMaxExtents.z << endl;
-
-	float maxDistance;
-	float temp = max(distance.x, distance.y);
-	maxDistance = max(temp, distance.z);
-	cout << "distance:" << maxDistance << endl;
-	if (maxDistance < 0) {
-		cout << "intersect: 1" << endl;
-		cout << "-----------------------------------"<<endl;
-		return true;
-	}
-	else {
-		cout << "intersect: 0" << endl;
-		cout << "-----------------------------------" << endl;
-
-		return false;
-	}
-}
-
-void BoundingBox::update(glm::mat4 trans)
-{
-	matrixTrans=trans;
-}
-
-void BoundingBox::draw(glm::mat4 trans, GLint shaderProgram)
+void IntermediateBox::draw(glm::mat4 trans, GLint shader)
 {
 	GLint shaderProg = 3;
 	glUseProgram(shaderProg);
 	// Calculate the combination of the model and view (camera inverse) matrices
-	glm::mat4 modelview;
-	//nonstatic = true;
-	if (nonstatic) {
-		modelview = Window::V * trans;
-	}
-	else {
-		glm::mat4 temp = trans;
-		temp[0][0] = 1;
-		temp[0][1] = 0;
-		temp[0][2] = 0;
-		temp[1][0] = 0;
-		temp[1][1] = 1;
-		temp[1][2] = 0;
-		temp[2][0] = 0;
-		temp[2][1] = 0;
-		temp[2][2] = 1;
-		modelview=Window::V*temp*glm::scale(glm::mat4(1.0f), glm::vec3(width,height, length));
-	}
+	glm::mat4 modelview = Window::V * trans;
 	// We need to calcullate this because modern OpenGL does not keep track of any matrix other than the viewport (D)
 	// Consequently, we need to forward the projection, view, and model matrices to the shader programs
 	// Get the location of the uniform variables "projection" and "modelview"
@@ -148,12 +43,7 @@ void BoundingBox::draw(glm::mat4 trans, GLint shaderProgram)
 	glBindVertexArray(0);
 }
 
-void BoundingBox::setNonStatic(bool position)
-{
-	nonstatic = position;
-}
-
-void BoundingBox::init()
+void IntermediateBox::init()
 {
 	toWorld = glm::mat4(1.0f);
 
@@ -193,17 +83,55 @@ void BoundingBox::init()
 	glBindVertexArray(0);
 }
 
-void BoundingBox::setHeight(float heightz)
+float IntermediateBox::getHeight()
 {
-	height = heightz;
+	return height;
 }
 
-void BoundingBox::setWidth(float widthz)
+float IntermediateBox::getWidth()
 {
-	width = widthz;
+	return width;
 }
 
-void BoundingBox::setLength(float lengthz)
+float IntermediateBox::getLength()
 {
-	length = lengthz;
+	return length;
+}
+
+void IntermediateBox::processPoints()
+{
+	float maxX = -1000000;
+	float maxY = -1000000;
+	float maxZ = -1000000;
+	float minX = 1000000;
+	float minY = 1000000;
+	float minZ = 1000000;
+
+	glm::mat4 neutered = matrixTrans;
+	for (int i = 0; i < 8; i++) {
+		glm::vec3 temp = glm::vec3(vertices[i][0], vertices[i][1], vertices[i][2]);
+		glm::vec4 mult = glm::vec4(temp, 1.0f);
+		mult = neutered * mult;
+		if (mult.x > maxX) {
+			maxX = mult.x;
+		}
+		else if (mult.x < minX) {
+			minX = mult.x;
+		}
+		if (mult.y > maxY) {
+			maxY = mult.y;
+		}
+		else if (mult.y < minY) {
+			minY = mult.y;
+		}
+		if (mult.z > maxZ) {
+			maxZ = mult.z;
+		}
+		else if (mult.y < minZ) {
+			minZ = mult.z;
+		}
+		width = maxX - minX;
+		height = maxY - minY;
+		length = maxZ - minZ;
+	}
 }
