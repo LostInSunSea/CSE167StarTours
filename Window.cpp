@@ -140,6 +140,16 @@ void Window::initialize_objects()
 	atat = new Model("../Assets/Models/atat/atat.obj");
 	turretBase = new Model("../Assets/Models/turret/turretBase.obj");
 	turretHead = new Model("../Assets/Models/turret/turretHead.obj");
+	audioEngine->streamSound("../Assets/Sound/Ambient/Hoth.mp3",false,true);
+	audioEngine->loadSound("../Assets/Sound/Ambient/Snowspeeder/Engine1.wav", false, true);
+	audioEngine->loadSound("../Assets/Sound/Ambient/laser.mp3", false, false);
+	audioEngine->loadSound("../Assets/Sound/Ambient/R2D2/Death.mp3", false, false);
+	audioEngine->loadSound("../Assets/Sound/Music/neeley.mp3", false, false);
+	audioEngine->loadSound("../Assets/Sound/Music/cantina.mp3", false, false);
+	audioEngine->loadSound("../Assets/Sound/Music/James_Bond.mp3", false, false);
+	audioEngine->loadSound("../Assets/Sound/Music/nyancat.mp3", false, false);
+
+
 
 	terrainBox = new BoundingBox();
 
@@ -263,6 +273,9 @@ void Window::initialize_objects()
 	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(quadData), quadData, GL_STATIC_DRAW);
 	glBindVertexArray(0);
+
+	audioEngine->playSound("../Assets/Sound/Ambient/Hoth.mp3", glm::vec3(1), glm::vec3(1), 1.0f);
+	audioEngine->playSound("../Assets/Sound/Ambient/Snowspeeder/Engine1.wav", glm::vec3(1), glm::vec3(1), 2.0f);
 }
 
 
@@ -468,6 +481,18 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		if (key == GLFW_KEY_2) {
 			shadowStyle = 2;
 		}
+		if (key == GLFW_KEY_6) {
+			audioEngine->playSound("../Assets/Sound/Music/cantina.mp3",glm::vec3(1),glm::vec3(1),4.0);
+		}
+		if (key == GLFW_KEY_7) {
+			audioEngine->playSound("../Assets/Sound/Music/neeley.mp3", glm::vec3(1), glm::vec3(1), 4.0);
+		}
+		if (key == GLFW_KEY_8) {
+			audioEngine->playSound("../Assets/Sound/Music/nyancat.mp3", glm::vec3(1), glm::vec3(1), 4.0);
+		}
+		if (key == GLFW_KEY_5) {
+			audioEngine->playSound("../Assets/Sound/Music/James_Bond.mp3", glm::vec3(1), glm::vec3(1), 4.0);
+		}
 	}
 	if (action == GLFW_REPEAT)
 	{
@@ -483,21 +508,6 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		if (key == GLFW_KEY_D) {
 			speederMT->M = glm::rotate(speederMT->M, (float)(-1) / 180.0f * glm::pi<float>(), glm::vec3(0, 1, 0));
 		}
-		if (key == GLFW_KEY_T) {
-			terrainBox->aabbTest(testBox);
-		}
-		if (key == GLFW_KEY_UP) {
-			testmat = glm::translate(testmat, glm::vec3(0.0f, 4.0f, 0.0f));
-		}
-		if (key == GLFW_KEY_DOWN) {
-			testmat = glm::translate(testmat, glm::vec3(0.0f, -4.0f, 0.0f));
-		}
-		if (key == GLFW_KEY_LEFT) {
-			testmat = glm::translate(testmat, glm::vec3(4.0f, 0.0f, 0.0f));
-		}		
-		if (key == GLFW_KEY_RIGHT) {
-			testmat = glm::translate(testmat, glm::vec3(-4.0f, 0.0f, 0.0f));
-		}
 	}
 }
 
@@ -511,6 +521,7 @@ void Window::mouse_button_callback(GLFWwindow* window, int button, int action, i
 	int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
 	if (state == GLFW_PRESS)
 	{
+		audioEngine->playSound("../Assets/Sound/Ambient/laser.mp3", glm::vec3(1), glm::vec3(1), 5.0f);
 		gun->spawn = true;
 	}
 }
@@ -544,6 +555,7 @@ void Window::checkAllBoundingBoxes()
 		if (testBox->aabbTest(listOfBoundingBoxes[i])) {
 			testBox->setColor(3);
 			listOfBoundingBoxes[i]->setColor(3);
+			audioEngine->playSound("../Assets/Sound/Ambient/R2D2/Death.mp3", glm::vec3(1), glm::vec3(1),3.0f);
 		}
 		else {
 			testBox->setColor(2);
