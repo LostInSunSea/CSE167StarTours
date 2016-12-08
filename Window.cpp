@@ -50,7 +50,7 @@ IntermediateBox * speederBoxInt;
 BoundingBox * testBox;
 glm::mat4 testmat = glm::mat4(1);
 glm::vec3 testVec = glm::vec3(0);
-
+bool drawBoundingBoxes=true;
 AudioEngine * audioEngine=new AudioEngine();
 SkyBox * skyboxObj = new SkyBox();
 
@@ -474,6 +474,15 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		}
 		if (key == GLFW_KEY_D) {
 			speederMT->M = glm::rotate(speederMT->M, (float)(-1) / 180.0f * glm::pi<float>(), glm::vec3(0, 1, 0));
+		}
+		if (key == GLFW_KEY_C) {
+			drawBoundingBoxes = !drawBoundingBoxes;
+			testBox->setDraw(drawBoundingBoxes);
+			speederBoxInt->setDraws();
+			for (int i = 0; i < listOfBoundingBoxes.size(); i++) {
+				listOfBoundingBoxes[i]->setDraw(drawBoundingBoxes);
+			}
+
 		}
 		if (key == GLFW_KEY_1) {
 			shadowStyle = 1;

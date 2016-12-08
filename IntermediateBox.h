@@ -63,6 +63,7 @@ private:
 	float height;
 	float width;
 	float length;
+	bool draws=true;
 public:
 	IntermediateBox();
 	~IntermediateBox();
@@ -73,6 +74,7 @@ public:
 	float getWidth();
 	float getLength();
 	void processPoints();
+	void setDraws();
 	//variables
 	// These variables are needed for the shader program
 	GLuint VBO, VAO, EBO;

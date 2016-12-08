@@ -54,6 +54,7 @@ private:
 	float width;
 	float length;
 	int color=2;
+	bool draws=true;
 public:
 	BoundingBox();
 	~BoundingBox();
@@ -71,6 +72,7 @@ public:
 	void setWidth(float widthz);
 	void setLength(float lengthz);
 	void setColor(int colorz);
+	void setDraw(bool drawz);
 	//variables
 	// These variables are needed for the shader program
 	GLuint VBO, VAO, EBO;

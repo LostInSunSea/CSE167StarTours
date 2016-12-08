@@ -21,31 +21,34 @@ void IntermediateBox::update(glm::mat4 trans)
 
 void IntermediateBox::draw(glm::mat4 trans, GLint shader)
 {
-	GLint shaderProg = 3;
-	glUseProgram(shaderProg);
-	// Calculate the combination of the model and view (camera inverse) matrices
-	glm::mat4 modelview = Window::V * trans;
-	// We need to calcullate this because modern OpenGL does not keep track of any matrix other than the viewport (D)
-	// Consequently, we need to forward the projection, view, and model matrices to the shader programs
-	// Get the location of the uniform variables "projection" and "modelview"
-	uProjection = glGetUniformLocation(shaderProg, "projection");
-	uModelview = glGetUniformLocation(shaderProg, "modelview");
-	glUniform1i(glGetUniformLocation(shaderProg, "light"), 1);
-	// Now send these values to the shader program
-	glUniformMatrix4fv(uProjection, 1, GL_FALSE, &Window::P[0][0]);
-	glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
+	if (draws) {
+		GLint shaderProg = 3;
+		glUseProgram(shaderProg);
+		// Calculate the combination of the model and view (camera inverse) matrices
+		glm::mat4 modelview = Window::V * trans;
+		// We need to calcullate this because modern OpenGL does not keep track of any matrix other than the viewport (D)
+		// Consequently, we need to forward the projection, view, and model matrices to the shader programs
+		// Get the location of the uniform variables "projection" and "modelview"
+		uProjection = glGetUniformLocation(shaderProg, "projection");
+		uModelview = glGetUniformLocation(shaderProg, "modelview");
+		glUniform1i(glGetUniformLocation(shaderProg, "light"), 1);
+		// Now send these values to the shader program
+		glUniformMatrix4fv(uProjection, 1, GL_FALSE, &Window::P[0][0]);
+		glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
 
-	glUniform3f(glGetUniformLocation(shaderProg, "viewPos"), 0, 0, 20.0f);
-	// Now draw the cube. We simply need to bind the VAO associated with it.
-	glBindVertexArray(VAO);
-	// Tell OpenGL to draw with triangles, using 36 indices, the type of the indices, and the offset to start from
-	glLineWidth(4);
-	glDrawArrays(GL_LINE_STRIP, 0, 12 * 3);
-	glBindVertexArray(0);
+		glUniform3f(glGetUniformLocation(shaderProg, "viewPos"), 0, 0, 20.0f);
+		// Now draw the cube. We simply need to bind the VAO associated with it.
+		glBindVertexArray(VAO);
+		// Tell OpenGL to draw with triangles, using 36 indices, the type of the indices, and the offset to start from
+		glLineWidth(4);
+		glDrawArrays(GL_LINE_STRIP, 0, 12 * 3);
+		glBindVertexArray(0);
+	}
 }
 
 void IntermediateBox::init()
 {
+
 	toWorld = glm::mat4(1.0f);
 
 	// Create array object and buffers. Remember to delete your buffers when the object is destroyed!
@@ -135,4 +138,9 @@ void IntermediateBox::processPoints()
 		height = maxY - minY;
 		length = maxZ - minZ;
 	}
+}
+
+void IntermediateBox::setDraws()
+{
+	draws = !draws;
 }
