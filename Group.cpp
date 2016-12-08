@@ -1,6 +1,7 @@
 #include "Group.h"
-
-
+#include <vector>
+#include <algorithm>
+using namespace std;
 
 Group::Group()
 {
@@ -24,5 +25,5 @@ void Group::addChild(Node * child)
 
 void Group::removeChild(Node * child)
 {
-
+	allNodes.erase(std::remove(allNodes.begin(), allNodes.end(), child), allNodes.end());
 }

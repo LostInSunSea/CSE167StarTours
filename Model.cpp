@@ -202,7 +202,7 @@ void Model::draw(glm::mat4 model, GLint shader)
 	glm::vec3 lightInvDir = -(sun->dir);
 	//need to fine tune/gen automatically
 	//glm::mat4 depthProjectionMatrix = glm::ortho<float>(-30, 30, -30, 30, -30, 60);
-	glm::mat4 depthProjectionMatrix = glm::ortho<float>(-50, 50, -50, 50, -50, 100);
+	glm::mat4 depthProjectionMatrix = glm::ortho<float>(-150, 150, -150, 150, -150, 150);
 	glm::mat4 depthViewMatrix = glm::lookAt(lightInvDir + cam_look_at, glm::vec3(0, 0, 0) + cam_look_at, glm::vec3(0, 1, 0));
 	//BASED OFF EACH OBJECT
 	glm::mat4 depthModelMatrix = model;

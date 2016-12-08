@@ -21,6 +21,7 @@ using namespace std;
 class Node
 {
 public:
+	bool toDelete = false;
 	Node();
 	~Node();
 	virtual void update(glm::mat4 trans)=0;

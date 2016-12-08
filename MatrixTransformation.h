@@ -3,7 +3,10 @@
 class MatrixTransformation :
 	public Group
 {
+private:
 public:
+	double prevTime;
+	float ttl = -1;
 	glm::mat4 M;
 	MatrixTransformation();
 	~MatrixTransformation();

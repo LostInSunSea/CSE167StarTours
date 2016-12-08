@@ -26,6 +26,7 @@ void Spawner::update(glm::mat4 trans)
 		//spawn = false;
 		MatrixTransformation * MT = new MatrixTransformation();
 		MT->M = trans;
+		MT->ttl = 2.0f;
 		MT->addChild(spawnee);
 		laserWorld->addChild(MT);
 	}

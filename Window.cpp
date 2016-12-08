@@ -85,6 +85,11 @@ dirLight_s Window::dirLight;
 pointLight_s Window::pointLight;
 spotlight_s Window::spotLight;
 
+float speed = 0.1f;
+float laserSpeed = 3.0f;
+
+
+bool displayShadowMap = false;
 
 
 int Window::manip = 0;
@@ -113,7 +118,7 @@ void Window::initialize_objects()
 	skyboxObj->init();
 
 	speederModel = new Model("../Assets/Models/snowspeeder2/snowSpeederv2.obj");
-	terrain = new Model("../Assets/Models/terrain/terrain.obj");
+	terrain = new Model("../Assets/Models/terrain/terrain2.obj");
 	laser = new Model("../Assets/Models/laser/laser.obj");
 	terrainBox = new BoundingBox();
 
@@ -145,7 +150,7 @@ void Window::initialize_objects()
 	glm::vec3 maxVec = terrain->getMaxVec();
 	glm::vec3 scaleVec = maxVec - minVec;
 	terrainBoxMT->M = glm::scale(trans, scaleVec);
-	terrainMT->M = glm::scale(glm::mat4(1.0f), glm::vec3(5, 1, 5));
+	terrainMT->M = glm::scale(glm::mat4(1.0f), glm::vec3(20, 1, 20));
 	speederMT->M = glm::translate(glm::mat4(1.0f), glm::vec3(0, 50, 0));
 
 	//laserWorld->addChild(laserMT);
@@ -276,19 +281,20 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 void Window::idle_callback()
 {
 	//update
-	speederMT->M = glm::translate(speederMT->M, glm::vec3(0, 0, -0.4f));
+	speederMT->M = glm::translate(speederMT->M, glm::vec3(0, 0, -speed));
 
 	for (Node * n : laserWorld->allNodes)
 	{
 		if (MatrixTransformation * mt = dynamic_cast<MatrixTransformation *>(n))
 		{
-			mt->M = glm::translate(mt->M, glm::vec3(0, 0, -0.5f));
+			mt->M = glm::translate(mt->M, glm::vec3(0, 0, -(laserSpeed + speed)));
 		}
 	}
 	
 	//testRot->M = glm::rotate(testRot->M, 0.1f, glm::vec3(0, 1, 0));
 	//testObj->M = glm::translate(testObj->M, glm::vec3(0, 0, -0.1f));
 	world->update(glm::mat4(1.0f));
+	laserWorld->update(glm::mat4(1.0f));
 	gun->spawn = false;
 }
 
@@ -329,33 +335,36 @@ void Window::display_callback(GLFWwindow* window)
 
 	// display quad
 
+	if (displayShadowMap)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, 256, 256);
+		glUseProgram(quadShader);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, 256, 256);
-	glUseProgram(quadShader);
+		// Bind our texture in Texture Unit 0
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, depthTexture);
+		// Set our "renderedTexture" sampler to user Texture Unit 0
+		glUniform1i(glGetUniformLocation(quadShader, "quadtexture"), 0);
 
-	// Bind our texture in Texture Unit 0
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, depthTexture);
-	// Set our "renderedTexture" sampler to user Texture Unit 0
-	glUniform1i(glGetUniformLocation(quadShader, "quadtexture"), 0);
+		// 1rst attribute buffer : vertices
+		glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+		glVertexAttribPointer(
+			0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+			3,                  // size
+			GL_FLOAT,           // type
+			GL_FALSE,           // normalized?
+			0,                  // stride
+			(void*)0            // array buffer offset
+		);
 
-	// 1rst attribute buffer : vertices
-	glEnableVertexAttribArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-	glVertexAttribPointer(
-		0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
-		3,                  // size
-		GL_FLOAT,           // type
-		GL_FALSE,           // normalized?
-		0,                  // stride
-		(void*)0            // array buffer offset
-	);
+		// Draw the triangles !
+		glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
 
-	// Draw the triangles !
-	glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
-
-	glDisableVertexAttribArray(0);
+		glDisableVertexAttribArray(0);
+	}
+	
 
 
 	// Gets events, including input such as keyboard and mouse or window resizing
@@ -379,7 +388,35 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			audioEngine->setChannelVolume(0, 2.0f);
 		}
 		
-		if (key == GLFW_KEY_T) {
+		if (key == GLFW_KEY_M) {
+			displayShadowMap = !displayShadowMap;
+		}
+		if (key == GLFW_KEY_W) {
+			speed += 0.1f;
+		}
+		if (key == GLFW_KEY_S) {
+			speed -= 0.1f;
+		}
+		if (key == GLFW_KEY_A) {
+			speederMT->M = glm::rotate(speederMT->M, (float)(1) / 180.0f * glm::pi<float>(), glm::vec3(0, 1, 0));
+		}
+		if (key == GLFW_KEY_D) {
+			speederMT->M = glm::rotate(speederMT->M, (float)(-1) / 180.0f * glm::pi<float>(), glm::vec3(0, 1, 0));
+		}
+	}
+	if (action == GLFW_REPEAT)
+	{
+		if (key == GLFW_KEY_W) {
+			speed += 0.1f;
+		}
+		if (key == GLFW_KEY_S) {
+			speed -= 0.1f;
+		}
+		if (key == GLFW_KEY_A) {
+			speederMT->M = glm::rotate(speederMT->M, (float)(1) / 180.0f * glm::pi<float>(), glm::vec3(0, 1, 0));
+		}
+		if (key == GLFW_KEY_D) {
+			speederMT->M = glm::rotate(speederMT->M, (float)(-1) / 180.0f * glm::pi<float>(), glm::vec3(0, 1, 0));
 		}
 	}
 }
@@ -391,7 +428,7 @@ void Window::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 
 void Window::mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
-	int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT);
+	int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
 	if (state == GLFW_PRESS)
 	{
 		gun->spawn = true;
@@ -405,13 +442,16 @@ void Window::cursor_position_callback(GLFWwindow* window, double xpos, double yp
 	float rot_angle, zoom_factor;
 	glm::vec3 curPoint;
 
+	speederMT->M = glm::rotate(speederMT->M, ((float)(ypos - prevy) / 5) / 180.0f * glm::pi<float>(), glm::vec3(1, 0, 0));
+	speederMT->M = glm::rotate(speederMT->M, ((float)(prevx - xpos) / 5) / 180.0f * glm::pi<float>(), glm::vec3(0, 0, 1));
+
+	/*
 	int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
 	if (state == GLFW_PRESS)
 	{
-		speederMT->M = glm::rotate(speederMT->M, ((float)(ypos - prevy)) / 180.0f * glm::pi<float>(), glm::vec3(1, 0, 0));
-		speederMT->M = glm::rotate(speederMT->M, ((float)(prevx - xpos)) / 180.0f * glm::pi<float>(), glm::vec3(0, 0, 1));
+		
 	}
-
+	*/
 	
 
 	prevx = xpos;
