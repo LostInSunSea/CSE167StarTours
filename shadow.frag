@@ -23,6 +23,7 @@ uniform DirLight dirLight;
 uniform sampler2D texture_diffuse1;
 uniform sampler2D shadowMap;
 uniform int shadowMapSize;
+uniform int style;
 
 
 out vec4 color;
@@ -63,30 +64,39 @@ void main()
 
 	
 	float visibility = 1.0;
-    float bias = 0.01;
+    float bias = 0.002;
 	vec3 light = CalcDirLight(dirLight, norm, viewDir);
 
 	vec3 DiffuseColor = texture( texture_diffuse1, TexCoords ).rgb;
     
-    /*
-    for(int i = 0; i < 4; i++)
-    {
-        int index = int(16.0*random(gl_FragCoord.xyy, i))%16;
-        visibility -= 0.15*(1-texture(shadowMap, vec3(ShadowCoords.xy + poissonDisk[index]/700.0, (ShadowCoords.z-bias)/ShadowCoords.w).xy).z);
 
-        
-    }
-    */
-    
-    if(ShadowCoords.x > 1 || ShadowCoords.y > 1 || ShadowCoords.x < 0 ||  ShadowCoords.y < 0 || ShadowCoords.z > 1 ||  ShadowCoords.z < 0)
+    if(style == 1)
     {
-        visibility = 1.0;
+        for(int i = 0; i < 4; i++)
+        {
+            int index = int(16.0*random(gl_FragCoord.xyy, i))%16;
+            visibility -= 0.15*(1-texture(shadowMap, vec3(ShadowCoords.xy + poissonDisk[index]/700.0, (ShadowCoords.z-bias)/ShadowCoords.w).xy).z);
+
+            
+        }
+
     }
-	else if(texture(shadowMap, ShadowCoords.xy).z < ShadowCoords.z - bias)
-	{
-		visibility = 0.5;
-	}
+    else if (style == 2)
+    {
+            if(ShadowCoords.x > 1 || ShadowCoords.y > 1 || ShadowCoords.x < 0 ||  ShadowCoords.y < 0 || ShadowCoords.z > 1 ||  ShadowCoords.z < 0)
+        {
+            visibility = 1.0;
+        }
+        else if(texture(shadowMap, ShadowCoords.xy).z < ShadowCoords.z - bias)
+        {
+            visibility = 0.5;
+        }
+    }
     
+    
+    
+    
+
     
     color = vec4(visibility * DiffuseColor, 1) * vec4(light, 1);
 }

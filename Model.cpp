@@ -8,6 +8,7 @@ extern GLuint DepthFrameBuffer;
 extern GLint depthShader;
 extern GLint shadowShader;
 extern GLint laserShader;
+extern int shadowStyle;
 
 GLint TextureFromFile(const char* path, std::string directory)
 {
@@ -202,7 +203,7 @@ void Model::draw(glm::mat4 model, GLint shader)
 	glm::vec3 lightInvDir = -(sun->dir);
 	//need to fine tune/gen automatically
 	//glm::mat4 depthProjectionMatrix = glm::ortho<float>(-30, 30, -30, 30, -30, 60);
-	glm::mat4 depthProjectionMatrix = glm::ortho<float>(-150, 150, -150, 150, -150, 150);
+	glm::mat4 depthProjectionMatrix = glm::ortho<float>(-500, 500, -500, 500, -500, 500);
 	glm::mat4 depthViewMatrix = glm::lookAt(lightInvDir + cam_look_at, glm::vec3(0, 0, 0) + cam_look_at, glm::vec3(0, 1, 0));
 	//BASED OFF EACH OBJECT
 	glm::mat4 depthModelMatrix = model;
@@ -240,6 +241,9 @@ void Model::draw(glm::mat4 model, GLint shader)
 		glUniform3f(glGetUniformLocation(shader, "dirLight.ambient"), sun->ambient.x, sun->ambient.y, sun->ambient.z);
 		glUniform3f(glGetUniformLocation(shader, "dirLight.diffuse"), sun->diffuse.x, sun->diffuse.y, sun->diffuse.z);
 		glUniform3f(glGetUniformLocation(shader, "dirLight.specular"), sun->specular.x, sun->specular.y, sun->specular.z);
+
+		glUniform1i(glGetUniformLocation(shader, "style"), shadowStyle);
+
 
 		glActiveTexture(GL_TEXTURE15);
 		glUniform1i(glGetUniformLocation(shader, "shadowMap"), 15);
