@@ -57,7 +57,7 @@ bool BoundingBox::aabbTest(BoundingBox* other)
 	if (other->getTransMatrix() == matrixTrans) {
 		cout << "hello world";
 	}
-
+	/*
 	cout << "-----------------------------------" << endl;
 	cout << "distance 1: "<< endl;
 	cout << "x: " << distance1.x << endl;
@@ -84,20 +84,14 @@ bool BoundingBox::aabbTest(BoundingBox* other)
 	cout << "x: " << othrMaxExtents.x << endl;
 	cout << "y: " << othrMaxExtents.y << endl;
 	cout << "z: " << othrMaxExtents.z << endl;
-
+	*/
 	float maxDistance;
 	float temp = max(distance.x, distance.y);
 	maxDistance = max(temp, distance.z);
-	cout << "distance:" << maxDistance << endl;
 	if (maxDistance < 0) {
-		cout << "intersect: 1" << endl;
-		cout << "-----------------------------------"<<endl;
 		return true;
 	}
 	else {
-		cout << "intersect: 0" << endl;
-		cout << "-----------------------------------" << endl;
-
 		return false;
 	}
 }
@@ -135,6 +129,7 @@ void BoundingBox::draw(glm::mat4 trans, GLint shaderProgram)
 	// Get the location of the uniform variables "projection" and "modelview"
 	uProjection = glGetUniformLocation(shaderProg, "projection");
 	uModelview = glGetUniformLocation(shaderProg, "modelview");
+	glUniform1i(glGetUniformLocation(shaderProg, "light"), color);
 	// Now send these values to the shader program
 	glUniformMatrix4fv(uProjection, 1, GL_FALSE, &Window::P[0][0]);
 	glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
@@ -206,4 +201,9 @@ void BoundingBox::setWidth(float widthz)
 void BoundingBox::setLength(float lengthz)
 {
 	length = lengthz;
+}
+
+void BoundingBox::setColor(int colorz)
+{
+	color = colorz;
 }

@@ -68,25 +68,20 @@ void main()
     
     if(light == 1)
     {
-		end = CalcDirLight(dirLight, norm, viewDir);
+		color = vec4(0.0f,0.0f,1.0f,1.0f);
     }
     else if(light == 2)
     {
-    	end = CalcPointLight(pointLight, norm, FragPos, viewDir);
+		color = vec4(0.0f,1.0f,0.0f,1.0f);
     }
     else if(light == 3)
     {
-    	end = CalcSpotLight(spotLight, norm, FragPos, viewDir);
+		color = vec4(1.0f,0.0f,0.0f,1.0f);
     }
-    end = end * material.color;
-	if(light == 0)
-    {
-    	//end = norm;
-    	end = normalize(objNormal);
-    }
-
+	else{
+		color = vec4(1.0f,1.0f,1.0f,1.0f);
+	}
     //color = vec4(end, 1.0f);
-	color = vec4(0.0f,0.0f,1.0f,1.0f);
 }
 
 

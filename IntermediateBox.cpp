@@ -30,6 +30,7 @@ void IntermediateBox::draw(glm::mat4 trans, GLint shader)
 	// Get the location of the uniform variables "projection" and "modelview"
 	uProjection = glGetUniformLocation(shaderProg, "projection");
 	uModelview = glGetUniformLocation(shaderProg, "modelview");
+	glUniform1i(glGetUniformLocation(shaderProg, "light"), 1);
 	// Now send these values to the shader program
 	glUniformMatrix4fv(uProjection, 1, GL_FALSE, &Window::P[0][0]);
 	glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
